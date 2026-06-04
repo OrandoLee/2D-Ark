@@ -1067,3 +1067,434 @@ button:focus-visible {
   .rating { position: static; margin-bottom: 18px; }
   .result-panel .start-button { width: 100%; }
 }
+
+/* Readability, profession icons, and drag deployment feedback */
+:root {
+  font-family: "Microsoft YaHei", "PingFang SC", Inter, Arial, sans-serif;
+}
+
+.eyebrow,
+.rail-label,
+.panel-heading,
+.start-index,
+.start-footer {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: .07em;
+}
+
+.signal,
+.metric span,
+.controls button,
+.rail-block strong,
+.unit-info,
+.unit-card,
+.pause-screen button,
+.system-message,
+.title-lockup > span,
+.title-lockup p,
+.briefing,
+.start-button,
+.result-panel > p,
+.result-stats span,
+.rating span {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.metric {
+  min-width: 88px;
+  padding: 9px 11px 8px;
+}
+
+.metric span {
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+
+.metric strong {
+  font-size: 17px;
+}
+
+.controls button {
+  min-width: 86px;
+  font-size: 12px;
+  letter-spacing: .03em;
+}
+
+.operation-layout {
+  grid-template-columns: minmax(0, 1fr) 230px;
+}
+
+.board-coordinates,
+.cell-code {
+  font-size: 10px;
+}
+
+.rail-block strong {
+  font-size: 13px;
+}
+
+.unit-info.empty p {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.info-title > span {
+  width: 42px;
+  height: 42px;
+  border-color: var(--unit-accent);
+  color: var(--unit-accent);
+}
+
+.info-title > span .type-icon {
+  transform: rotate(-45deg);
+}
+
+.info-title strong {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.info-title small {
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.info-grid {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  gap: 8px;
+}
+
+.retreat-button {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+}
+
+.unit-card {
+  grid-template-columns: 52px 1fr;
+  min-height: 98px;
+  padding: 11px;
+  user-select: none;
+  touch-action: none;
+}
+
+.unit-card[draggable="true"]:active {
+  cursor: grabbing;
+  opacity: .7;
+}
+
+.type-melee { --unit-accent: #ff9178; }
+.type-ranged { --unit-accent: #72a7ff; }
+.type-medic { --unit-accent: #79e6b1; }
+
+.card-icon {
+  width: 46px;
+  height: 46px;
+  border-color: var(--unit-accent);
+  background: color-mix(in srgb, var(--unit-accent) 9%, transparent);
+  color: var(--unit-accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--unit-accent) 20%, transparent);
+}
+
+.type-icon {
+  width: 72%;
+  height: 72%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.type-icon-pulse {
+  opacity: .55;
+  stroke-width: 1.2;
+}
+
+.card-icon .type-icon,
+.deployed-unit .type-icon {
+  transform: rotate(-45deg);
+}
+
+.card-cost {
+  font-size: 11px;
+}
+
+.card-copy strong {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card-copy small,
+.card-stat {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 10px;
+}
+
+.card-copy small {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.card-copy small b {
+  padding: 2px 5px;
+  border: 1px solid color-mix(in srgb, var(--unit-accent) 55%, transparent);
+  color: var(--unit-accent);
+  font-weight: 600;
+}
+
+.card-stat {
+  color: #d5d8de;
+}
+
+.deployed-unit .unit-mark {
+  border-color: var(--unit-accent);
+  color: var(--unit-accent);
+  box-shadow: 0 0 0 1px #000, 0 0 18px color-mix(in srgb, var(--unit-accent) 28%, transparent);
+}
+
+.deployed-unit em {
+  font-size: 8px;
+}
+
+.drop-target {
+  z-index: 4;
+  background: rgba(255,255,255,.15);
+  box-shadow: inset 0 0 0 3px #fff, 0 0 26px rgba(114,167,255,.75);
+}
+
+.drop-target.deploy-illegal {
+  background: rgba(240,93,101,.2);
+  box-shadow: inset 0 0 0 3px var(--red), 0 0 22px rgba(240,93,101,.5);
+}
+
+.pause-screen button,
+.system-message {
+  font-size: 12px;
+}
+
+.drag-instruction {
+  position: absolute;
+  z-index: 11;
+  right: 28px;
+  bottom: 24px;
+  padding: 10px 14px;
+  border: 1px solid rgba(114,167,255,.65);
+  background: rgba(7,12,20,.92);
+  color: #e1edff;
+  font: 600 13px "Microsoft YaHei", sans-serif;
+  box-shadow: 0 0 30px rgba(114,167,255,.2);
+  pointer-events: none;
+}
+
+.unit-drag-ghost {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.65);
+  background: rgba(8,11,16,.94);
+  color: #fff;
+  transform: translate(14px, 14px);
+  pointer-events: none;
+  box-shadow: 0 12px 40px rgba(0,0,0,.6), 0 0 20px rgba(114,167,255,.28);
+}
+
+.unit-drag-ghost span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--unit-accent);
+  color: var(--unit-accent);
+}
+
+.unit-drag-ghost strong {
+  font: 600 13px "Microsoft YaHei", sans-serif;
+}
+
+.grid-cell.drag-active:not(.deploy-legal) {
+  cursor: not-allowed;
+}
+
+.direction-overlay {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  background: rgba(3,5,8,.42);
+  cursor: crosshair;
+  backdrop-filter: blur(1px);
+}
+
+.direction-help {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  display: grid;
+  gap: 4px;
+  min-width: 340px;
+  padding: 12px 18px;
+  border: 1px solid rgba(114,167,255,.7);
+  background: rgba(7,10,15,.95);
+  text-align: center;
+  transform: translateX(-50%);
+  box-shadow: 0 10px 40px rgba(0,0,0,.45);
+}
+
+.direction-help span,
+.direction-help small {
+  color: var(--muted);
+  font: 11px "Microsoft YaHei", sans-serif;
+}
+
+.direction-help strong {
+  font: 600 15px "Microsoft YaHei", sans-serif;
+}
+
+.direction-line {
+  position: fixed;
+  z-index: 31;
+  height: 2px;
+  background: linear-gradient(90deg, var(--blue), rgba(114,167,255,.08));
+  box-shadow: 0 0 10px var(--blue);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.direction-anchor {
+  position: fixed;
+  z-index: 32;
+  width: 154px;
+  height: 154px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 0 0 14px rgba(114,167,255,.05), 0 0 70px rgba(114,167,255,.26);
+}
+
+.direction-anchor i {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 34px;
+  height: 34px;
+  border: 2px solid #fff;
+  background: rgba(114,167,255,.24);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.direction-option {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(5,7,10,.82);
+  color: #727985;
+  font: 600 22px "IBM Plex Mono", monospace;
+  transition: .12s ease;
+}
+
+.direction-option.active {
+  border-color: var(--blue);
+  background: rgba(114,167,255,.25);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(114,167,255,.55);
+  transform: scale(1.18);
+}
+
+.direction-option-up { top: -21px; left: 56px; }
+.direction-option-right { top: 56px; right: -21px; }
+.direction-option-down { bottom: -21px; left: 56px; }
+.direction-option-left { top: 56px; left: -21px; }
+
+.direction-cursor {
+  position: fixed;
+  z-index: 33;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid var(--blue);
+  background: rgba(7,10,15,.94);
+  color: #fff;
+  transform: translate(12px, 12px);
+  pointer-events: none;
+  box-shadow: 0 0 18px rgba(114,167,255,.38);
+}
+
+.direction-cursor b { font-size: 18px; }
+.direction-cursor span { font: 600 12px "Microsoft YaHei", sans-serif; }
+
+.direction-cancel {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  padding: 10px 16px;
+  border: 1px solid rgba(240,93,101,.6);
+  background: rgba(28,8,10,.94);
+  color: #ffc2c6;
+  font: 500 12px "Microsoft YaHei", sans-serif;
+  cursor: pointer;
+}
+
+.title-lockup > span {
+  font-size: 13px;
+}
+
+.title-lockup p {
+  font-size: 14px;
+}
+
+.briefing span {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+}
+
+.briefing p {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.start-button {
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+}
+
+.result-panel > p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.result-stats span,
+.rating span {
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .operation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .unit-card {
+    flex: 0 0 220px;
+  }
+}
+
+@media (max-width: 680px) {
+  .metric span { font-size: 9px; }
+  .metric strong { font-size: 13px; }
+  .direction-help { min-width: 280px; }
+}

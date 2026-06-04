@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react'
+import { UNIT_DEFINITIONS } from '../data/units'
 import { useGameState } from '../hooks/useGameState'
+import type { UnitId } from '../types/game'
 import { DirectionPicker } from './DirectionPicker'
 import { GameBoard } from './GameBoard'
 import { ResultScreen } from './ResultScreen'
@@ -6,9 +9,31 @@ import { StartScreen } from './StartScreen'
 import { TopBar } from './TopBar'
 import { UnitInfoPanel } from './UnitInfoPanel'
 import { UnitPanel } from './UnitPanel'
+import { UnitTypeIcon } from './UnitTypeIcon'
+
+interface DragState {
+  unitId: UnitId
+  x: number
+  y: number
+  cell?: { row: number; col: number }
+}
+
+function getCellAtPointer(x: number, y: number) {
+  const element = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-row][data-col]')
+  if (!element) return undefined
+  return {
+    row: Number(element.dataset.row),
+    col: Number(element.dataset.col),
+  }
+}
 
 export function GridDefenseGame() {
   const { state, actions } = useGameState()
+  const [dragState, setDragState] = useState<DragState>()
+
+  useEffect(() => {
+    if (state.pendingDirectionCell || !state.selectedUnitId) setDragState(undefined)
+  }, [state.pendingDirectionCell, state.selectedUnitId])
 
   if (state.phase === 'start') {
     return <StartScreen onStart={actions.startGame} />
@@ -47,8 +72,13 @@ export function GridDefenseGame() {
           <div className="board-stage">
             <GameBoard
               state={state}
+              isDraggingUnit={Boolean(dragState)}
+              dragOverCell={dragState?.cell}
               onCellClick={actions.clickCell}
             />
+            {dragState && (
+              <div className="drag-instruction">将模块拖到高亮格子完成部署</div>
+            )}
             {state.isPaused && (
               <div className="pause-screen">
                 <span>模拟已暂停</span>
@@ -62,7 +92,9 @@ export function GridDefenseGame() {
             <div className="rail-block">
               <span className="rail-label">行动监测</span>
               <strong>
-                {state.intermission > 0
+                {state.waveElapsed < 0
+                  ? `战术准备 / ${Math.ceil(-state.waveElapsed)} 秒`
+                  : state.intermission > 0
                   ? `下一波 / ${Math.max(0, 3 - state.intermission).toFixed(1)} 秒`
                   : `场上敌人 / ${String(state.enemies.length).padStart(2, '0')}`}
               </strong>
@@ -80,8 +112,31 @@ export function GridDefenseGame() {
           selectedUnitId={state.selectedUnitId}
           disabled={state.isPaused}
           onSelect={actions.selectUnit}
+          onPointerDragStart={(unitId, x, y) => {
+            actions.beginUnitDrag(unitId)
+            setDragState({ unitId, x, y, cell: getCellAtPointer(x, y) })
+          }}
+          onPointerDragMove={(x, y) => {
+            setDragState((current) =>
+              current ? { ...current, x, y, cell: getCellAtPointer(x, y) } : current,
+            )
+          }}
+          onPointerDragEnd={(x, y) => {
+            const cell = getCellAtPointer(x, y)
+            if (cell) actions.clickCell(cell.row, cell.col)
+            setDragState(undefined)
+          }}
         />
       </section>
+
+      {dragState && (
+        <div className="unit-drag-ghost" style={{ left: dragState.x, top: dragState.y }}>
+          <span className={`type-${UNIT_DEFINITIONS[dragState.unitId].type}`}>
+            <UnitTypeIcon type={UNIT_DEFINITIONS[dragState.unitId].type} />
+          </span>
+          <strong>{UNIT_DEFINITIONS[dragState.unitId].name}</strong>
+        </div>
+      )}
 
       {state.pendingDirectionCell && (
         <DirectionPicker

@@ -33,10 +33,10 @@ const createInitialState = (phase: GameState['phase'] = 'start'): GameState => (
   speedMultiplier: 1,
   isPaused: false,
   effects: [],
-  message: phase === 'playing' ? '第 01 波已启动' : undefined,
+  message: phase === 'playing' ? '战术准备：4 秒后敌人出现' : undefined,
   elapsedTime: 0,
   deployCount: 0,
-  waveElapsed: 0,
+  waveElapsed: -4,
   waveSpawnIndex: 0,
   intermission: 0,
   dpAccumulator: 0,
@@ -339,6 +339,26 @@ export function useGameState() {
     })
   }
 
+  const beginUnitDrag = (unitId: UnitId) => {
+    setState((current) => {
+      if (current.phase !== 'playing' || current.isPaused) return current
+      const definition = UNIT_DEFINITIONS[unitId]
+      if (current.deployedUnits.length >= DEPLOY_LIMIT) {
+        return { ...current, message: '已达到部署上限' }
+      }
+      if (current.dp < definition.cost) {
+        return { ...current, message: 'DP 不足' }
+      }
+      return {
+        ...current,
+        selectedUnitId: unitId,
+        selectedDeployedId: undefined,
+        pendingDirectionCell: undefined,
+        message: '拖拽至高亮格子部署',
+      }
+    })
+  }
+
   const validateDeployment = (current: GameState, unitId: UnitId, row: number, col: number) => {
     const definition = UNIT_DEFINITIONS[unitId]
     const cell = getCell(row, col)
@@ -476,6 +496,7 @@ export function useGameState() {
       startGame,
       restartGame,
       selectUnit,
+      beginUnitDrag,
       clickCell,
       chooseDirection,
       retreatSelected,

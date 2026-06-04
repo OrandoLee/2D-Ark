@@ -1,5 +1,6 @@
 import { UNIT_DEFINITIONS } from '../data/units'
 import type { DeployedUnit } from '../types/game'
+import { UnitTypeIcon } from './UnitTypeIcon'
 
 interface UnitInfoPanelProps {
   unit?: DeployedUnit
@@ -22,7 +23,9 @@ export function UnitInfoPanel({ unit, onRetreat }: UnitInfoPanelProps) {
     <div className="unit-info">
       <span className="rail-label">模块检查器</span>
       <div className="info-title">
-        <span>{definition.callsign}</span>
+        <span className={`type-${definition.type}`}>
+          <UnitTypeIcon type={definition.type} />
+        </span>
         <div>
           <strong>{definition.name}</strong>
           <small>{definition.description}</small>

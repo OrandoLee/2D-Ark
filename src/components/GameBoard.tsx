@@ -5,10 +5,12 @@ import { GridCell } from './GridCell'
 
 interface GameBoardProps {
   state: GameState
+  isDraggingUnit: boolean
+  dragOverCell?: { row: number; col: number }
   onCellClick: (row: number, col: number) => void
 }
 
-export function GameBoard({ state, onCellClick }: GameBoardProps) {
+export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: GameBoardProps) {
   const selectedDefinition = state.selectedUnitId
     ? UNIT_DEFINITIONS[state.selectedUnitId]
     : undefined
@@ -40,6 +42,8 @@ export function GameBoard({ state, onCellClick }: GameBoardProps) {
               cell={cell}
               unit={unit}
               isLegal={isLegal}
+              isDragging={isDraggingUnit}
+              isDragOver={dragOverCell?.row === cell.row && dragOverCell?.col === cell.col}
               isSelected={unit?.instanceId === state.selectedDeployedId}
               onClick={() => onCellClick(cell.row, cell.col)}
             />

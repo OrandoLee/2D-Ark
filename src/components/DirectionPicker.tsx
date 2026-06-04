@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { MAP_COLS, MAP_ROWS } from '../data/map'
 import type { Direction, PendingCell } from '../types/game'
 
 interface DirectionPickerProps {
@@ -6,35 +8,118 @@ interface DirectionPickerProps {
   onCancel: () => void
 }
 
+interface ScreenPoint {
+  x: number
+  y: number
+}
+
+const DIRECTION_LABELS: Record<Direction, string> = {
+  up: '向上',
+  down: '向下',
+  left: '向左',
+  right: '向右',
+}
+
+const DIRECTION_SYMBOLS: Record<Direction, string> = {
+  up: '↑',
+  down: '↓',
+  left: '←',
+  right: '→',
+}
+
+function directionFromPointer(anchor: ScreenPoint, pointer: ScreenPoint): Direction {
+  const dx = pointer.x - anchor.x
+  const dy = pointer.y - anchor.y
+  if (Math.abs(dx) > Math.abs(dy)) return dx >= 0 ? 'right' : 'left'
+  return dy >= 0 ? 'down' : 'up'
+}
+
+function getCellCenter(cell: PendingCell): ScreenPoint {
+  const board = document.querySelector('.game-board')?.getBoundingClientRect()
+  if (!board) return { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+  return {
+    x: board.left + ((cell.col + 0.5) / MAP_COLS) * board.width,
+    y: board.top + ((cell.row + 0.5) / MAP_ROWS) * board.height,
+  }
+}
+
 export function DirectionPicker({ cell, onChoose, onCancel }: DirectionPickerProps) {
-  const options: { value: Direction; symbol: string; label: string }[] = [
-    { value: 'up', symbol: '↑', label: '向上' },
-    { value: 'left', symbol: '←', label: '向左' },
-    { value: 'right', symbol: '→', label: '向右' },
-    { value: 'down', symbol: '↓', label: '向下' },
-  ]
+  const [anchor, setAnchor] = useState<ScreenPoint>(() => getCellCenter(cell))
+  const [pointer, setPointer] = useState<ScreenPoint>(() => ({
+    x: getCellCenter(cell).x + 100,
+    y: getCellCenter(cell).y,
+  }))
+  const [direction, setDirection] = useState<Direction>('right')
+
+  useEffect(() => {
+    const updateAnchor = () => setAnchor(getCellCenter(cell))
+    window.addEventListener('resize', updateAnchor)
+    return () => window.removeEventListener('resize', updateAnchor)
+  }, [cell])
+
+  const updatePointer = (x: number, y: number) => {
+    const nextPointer = { x, y }
+    setPointer(nextPointer)
+    setDirection(directionFromPointer(anchor, nextPointer))
+  }
+
+  const lineLength = Math.hypot(pointer.x - anchor.x, pointer.y - anchor.y)
+  const lineAngle = Math.atan2(pointer.y - anchor.y, pointer.x - anchor.x)
 
   return (
-    <div className="modal-backdrop" onClick={onCancel}>
-      <div className="direction-picker" onClick={(event) => event.stopPropagation()}>
-        <span className="eyebrow">需要设定朝向</span>
-        <h2>选择攻击方向</h2>
-        <p>
-          目标格 {String.fromCharCode(65 + cell.row)}
-          {String(cell.col + 1).padStart(2, '0')}
-        </p>
-        <div className="direction-grid">
-          {options.map((option) => (
-            <button key={option.value} onClick={() => onChoose(option.value)}>
-              <b>{option.symbol}</b>
-              <span>{option.label}</span>
-            </button>
-          ))}
-        </div>
-        <button className="text-button" onClick={onCancel}>
-          取消部署
-        </button>
+    <div
+      className="direction-overlay"
+      onPointerMove={(event) => updatePointer(event.clientX, event.clientY)}
+      onClick={() => onChoose(direction)}
+      onContextMenu={(event) => {
+        event.preventDefault()
+        onCancel()
+      }}
+    >
+      <div className="direction-help">
+        <span>部署朝向</span>
+        <strong>移动鼠标选择方向，单击确认</strong>
+        <small>右键可取消部署</small>
       </div>
+
+      <div
+        className="direction-line"
+        style={{
+          left: anchor.x,
+          top: anchor.y,
+          width: Math.min(lineLength, 180),
+          transform: `rotate(${lineAngle}rad)`,
+        }}
+      />
+
+      <div className="direction-anchor" style={{ left: anchor.x, top: anchor.y }}>
+        {(['up', 'right', 'down', 'left'] as Direction[]).map((item) => (
+          <span
+            className={`direction-option direction-option-${item} ${
+              item === direction ? 'active' : ''
+            }`}
+            key={item}
+          >
+            {DIRECTION_SYMBOLS[item]}
+          </span>
+        ))}
+        <i />
+      </div>
+
+      <div className="direction-cursor" style={{ left: pointer.x, top: pointer.y }}>
+        <b>{DIRECTION_SYMBOLS[direction]}</b>
+        <span>{DIRECTION_LABELS[direction]}</span>
+      </div>
+
+      <button
+        className="direction-cancel"
+        onClick={(event) => {
+          event.stopPropagation()
+          onCancel()
+        }}
+      >
+        取消部署
+      </button>
     </div>
   )
 }

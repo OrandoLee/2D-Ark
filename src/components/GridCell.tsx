@@ -1,15 +1,26 @@
 import { UNIT_DEFINITIONS } from '../data/units'
 import type { DeployedUnit, GridCellData } from '../types/game'
+import { UnitTypeIcon } from './UnitTypeIcon'
 
 interface GridCellProps {
   cell: GridCellData
   unit?: DeployedUnit
   isLegal?: boolean
+  isDragging: boolean
+  isDragOver: boolean
   isSelected: boolean
   onClick: () => void
 }
 
-export function GridCell({ cell, unit, isLegal, isSelected, onClick }: GridCellProps) {
+export function GridCell({
+  cell,
+  unit,
+  isLegal,
+  isDragging,
+  isDragOver,
+  isSelected,
+  onClick,
+}: GridCellProps) {
   const definition = unit ? UNIT_DEFINITIONS[unit.definitionId] : undefined
   const hpPercent = unit && definition ? (unit.hp / definition.maxHp) * 100 : 0
   const cellTypeNames = {
@@ -28,9 +39,13 @@ export function GridCell({ cell, unit, isLegal, isSelected, onClick }: GridCellP
         cell.isPath ? 'cell-path' : '',
         isLegal === true ? 'deploy-legal' : '',
         isLegal === false ? 'deploy-illegal' : '',
+        isDragging ? 'drag-active' : '',
+        isDragOver ? 'drop-target' : '',
         isSelected ? 'cell-selected' : '',
       ].join(' ')}
       onClick={onClick}
+      data-row={cell.row}
+      data-col={cell.col}
       role="gridcell"
       aria-label={`${cellTypeNames[cell.type]}格，第 ${cell.row + 1} 行，第 ${cell.col + 1} 列`}
     >
@@ -38,12 +53,12 @@ export function GridCell({ cell, unit, isLegal, isSelected, onClick }: GridCellP
       {cell.type === 'spawn' && <span className="cell-code">入口</span>}
       {cell.type === 'base' && <span className="cell-code">核心</span>}
       {unit && definition && (
-        <div className={`deployed-unit unit-${unit.definitionId}`}>
+        <div className={`deployed-unit unit-${unit.definitionId} type-${definition.type}`}>
           <span className="hp-track unit-hp">
             <span style={{ width: `${hpPercent}%` }} />
           </span>
           <i className={`unit-mark direction-${unit.direction ?? 'none'}`}>
-            <b>{definition.callsign}</b>
+            <UnitTypeIcon type={definition.type} />
           </i>
           {definition.block > 0 && (
             <em>
