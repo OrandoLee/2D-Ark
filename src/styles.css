@@ -906,13 +906,6 @@ button:focus-visible {
   -webkit-text-stroke: 1px rgba(255,255,255,.42);
 }
 
-.title-lockup p {
-  margin: 0;
-  color: #90959d;
-  font: 11px "IBM Plex Mono", monospace;
-  letter-spacing: .06em;
-}
-
 .briefing {
   display: grid;
   grid-template-columns: 100px minmax(0, 420px);
@@ -1117,7 +1110,6 @@ button:focus-visible {
 .pause-screen button,
 .system-message,
 .title-lockup > span,
-.title-lockup p,
 .briefing,
 .start-button,
 .result-panel > p,
@@ -1481,10 +1473,6 @@ button:focus-visible {
 
 .title-lockup > span {
   font-size: 13px;
-}
-
-.title-lockup p {
-  font-size: 14px;
 }
 
 .briefing span {

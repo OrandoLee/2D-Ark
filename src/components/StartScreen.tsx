@@ -18,7 +18,6 @@ export function StartScreen({ onStart }: StartScreenProps) {
             GRID DEFENSE
             <b>LAB-01</b>
           </h1>
-          <p>DELEE LAB 战术格子实验</p>
         </div>
         <div className="briefing">
           <span>行动指令</span>
