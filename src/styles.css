@@ -1357,6 +1357,12 @@ button:focus-visible {
   font: 11px "Microsoft YaHei", sans-serif;
 }
 
+.direction-help span {
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .direction-help strong {
   font: 600 15px "Microsoft YaHei", sans-serif;
 }

@@ -77,9 +77,9 @@ export function DirectionPicker({ cell, onChoose, onCancel }: DirectionPickerPro
       }}
     >
       <div className="direction-help">
-        <span>部署朝向</span>
+        <span>部署朝向 / 模拟已暂停</span>
         <strong>移动鼠标选择方向，单击确认</strong>
-        <small>右键可取消部署</small>
+        <small>敌人和战斗进程已冻结，右键可取消部署</small>
       </div>
 
       <div

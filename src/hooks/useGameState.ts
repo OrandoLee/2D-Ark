@@ -62,7 +62,9 @@ export function useGameState() {
   const advanceGame = useCallback(
     (dt: number) => {
       setState((previous) => {
-        if (previous.phase !== 'playing' || previous.isPaused) return previous
+        if (previous.phase !== 'playing' || previous.isPaused || previous.pendingDirectionCell) {
+          return previous
+        }
 
         const next: GameState = {
           ...previous,
@@ -303,7 +305,7 @@ export function useGameState() {
 
   useGameLoop(
     advanceGame,
-    state.phase === 'playing' && !state.isPaused,
+    state.phase === 'playing' && !state.isPaused && !state.pendingDirectionCell,
     state.speedMultiplier,
   )
 
