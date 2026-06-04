@@ -1,0 +1,48 @@
+import type { EnemyDefinition, EnemyId } from '../types/game'
+
+export const ENEMY_DEFINITIONS: Record<EnemyId, EnemyDefinition> = {
+  runner: {
+    id: 'runner',
+    name: 'Runner',
+    maxHp: 180,
+    attack: 35,
+    attackInterval: 800,
+    speed: 1.25,
+    defense: 10,
+    leakDamage: 1,
+    rewardDp: 1,
+  },
+  soldier: {
+    id: 'soldier',
+    name: 'Soldier',
+    maxHp: 350,
+    attack: 50,
+    attackInterval: 1200,
+    speed: 0.85,
+    defense: 30,
+    leakDamage: 1,
+    rewardDp: 2,
+  },
+  heavy: {
+    id: 'heavy',
+    name: 'Heavy',
+    maxHp: 900,
+    attack: 80,
+    attackInterval: 1500,
+    speed: 0.45,
+    defense: 80,
+    leakDamage: 2,
+    rewardDp: 4,
+  },
+  'prototype-boss': {
+    id: 'prototype-boss',
+    name: 'Prototype Boss',
+    maxHp: 3000,
+    attack: 120,
+    attackInterval: 1800,
+    speed: 0.45,
+    defense: 50,
+    leakDamage: 5,
+    rewardDp: 10,
+  },
+}
