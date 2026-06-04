@@ -21,8 +21,8 @@ export function UnitPanel({
   return (
     <div className="unit-panel">
       <div className="panel-heading">
-        <span className="eyebrow">Module Inventory</span>
-        <span>SELECT → GRID → ORIENT</span>
+        <span className="eyebrow">作战模块库</span>
+        <span>选择模块 → 选择格子 → 设定朝向</span>
       </div>
       <div className="unit-card-row">
         {UNIT_LIST.map((unit) => (

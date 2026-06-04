@@ -12,6 +12,13 @@ interface GridCellProps {
 export function GridCell({ cell, unit, isLegal, isSelected, onClick }: GridCellProps) {
   const definition = unit ? UNIT_DEFINITIONS[unit.definitionId] : undefined
   const hpPercent = unit && definition ? (unit.hp / definition.maxHp) * 100 : 0
+  const cellTypeNames = {
+    blue: '地面',
+    yellow: '高台',
+    red: '禁用',
+    spawn: '敌人入口',
+    base: '核心',
+  }
 
   return (
     <button
@@ -25,11 +32,11 @@ export function GridCell({ cell, unit, isLegal, isSelected, onClick }: GridCellP
       ].join(' ')}
       onClick={onClick}
       role="gridcell"
-      aria-label={`${cell.type} cell ${cell.row + 1}, ${cell.col + 1}`}
+      aria-label={`${cellTypeNames[cell.type]}格，第 ${cell.row + 1} 行，第 ${cell.col + 1} 列`}
     >
       {cell.isPath && <span className="path-node" />}
-      {cell.type === 'spawn' && <span className="cell-code">IN</span>}
-      {cell.type === 'base' && <span className="cell-code">CORE</span>}
+      {cell.type === 'spawn' && <span className="cell-code">入口</span>}
+      {cell.type === 'base' && <span className="cell-code">核心</span>}
       {unit && definition && (
         <div className={`deployed-unit unit-${unit.definitionId}`}>
           <span className="hp-track unit-hp">

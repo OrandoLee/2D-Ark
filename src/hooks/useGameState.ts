@@ -33,7 +33,7 @@ const createInitialState = (phase: GameState['phase'] = 'start'): GameState => (
   speedMultiplier: 1,
   isPaused: false,
   effects: [],
-  message: phase === 'playing' ? 'Wave 01 initialized' : undefined,
+  message: phase === 'playing' ? '第 01 波已启动' : undefined,
   elapsedTime: 0,
   deployCount: 0,
   waveElapsed: 0,
@@ -288,7 +288,7 @@ export function useGameState() {
               next.waveElapsed = 0
               next.waveSpawnIndex = 0
               next.intermission = 0
-              next.message = `Wave ${String(next.currentWave + 1).padStart(2, '0')} initialized`
+              next.message = `第 ${String(next.currentWave + 1).padStart(2, '0')} 波已启动`
             }
           }
         } else {
@@ -324,10 +324,10 @@ export function useGameState() {
       if (current.phase !== 'playing' || current.isPaused) return current
       const definition = UNIT_DEFINITIONS[unitId]
       if (current.deployedUnits.length >= DEPLOY_LIMIT) {
-        return { ...current, message: 'Deploy limit reached' }
+        return { ...current, message: '已达到部署上限' }
       }
       if (current.dp < definition.cost) {
-        return { ...current, message: 'Not enough DP' }
+        return { ...current, message: 'DP 不足' }
       }
       return {
         ...current,
@@ -342,12 +342,12 @@ export function useGameState() {
   const validateDeployment = (current: GameState, unitId: UnitId, row: number, col: number) => {
     const definition = UNIT_DEFINITIONS[unitId]
     const cell = getCell(row, col)
-    if (!cell || !cell.deployableTypes.includes(definition.type)) return 'Invalid deployment cell'
+    if (!cell || !cell.deployableTypes.includes(definition.type)) return '该格无法部署此模块'
     if (current.deployedUnits.some((unit) => unit.row === row && unit.col === col)) {
-      return 'Cell already occupied'
+      return '该格已有模块'
     }
-    if (current.dp < definition.cost) return 'Not enough DP'
-    if (current.deployedUnits.length >= DEPLOY_LIMIT) return 'Deploy limit reached'
+    if (current.dp < definition.cost) return 'DP 不足'
+    if (current.deployedUnits.length >= DEPLOY_LIMIT) return '已达到部署上限'
     return undefined
   }
 
@@ -377,7 +377,7 @@ export function useGameState() {
       selectedUnitId: undefined,
       selectedDeployedId: unit.instanceId,
       pendingDirectionCell: undefined,
-      message: `${definition.name} online`,
+      message: `${definition.name} 已上线`,
     }
   }
 
@@ -392,7 +392,7 @@ export function useGameState() {
           return {
             ...current,
             pendingDirectionCell: { row, col, unitId: current.selectedUnitId },
-            message: 'Select module direction',
+            message: '请选择模块朝向',
           }
         }
         return deploy(current, current.selectedUnitId, row, col)
@@ -439,7 +439,7 @@ export function useGameState() {
             : enemy,
         ),
         selectedDeployedId: undefined,
-        message: `Module recalled / +${refund} DP`,
+        message: `模块已撤回 / +${refund} DP`,
       }
     })
   }

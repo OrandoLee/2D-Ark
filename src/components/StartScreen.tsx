@@ -11,27 +11,27 @@ export function StartScreen({ onStart }: StartScreenProps) {
         ))}
       </div>
       <div className="start-content">
-        <span className="start-index">EXPERIMENT INDEX / 001</span>
+        <span className="start-index">实验编号 / 001</span>
         <div className="title-lockup">
-          <span>DELEE LAB PRESENTS</span>
+          <span>DELEE LAB 呈现</span>
           <h1>
             GRID DEFENSE
             <b>LAB-01</b>
           </h1>
-          <p>A tactical grid experiment by DELEE LAB</p>
+          <p>DELEE LAB 战术格子实验</p>
         </div>
         <div className="briefing">
-          <span>Directive</span>
-          <p>Deploy modular defenses. Contain five hostile waves. Preserve the core.</p>
+          <span>行动指令</span>
+          <p>部署作战模块，抵御五波敌人，保护核心完整。</p>
         </div>
         <button className="start-button" onClick={onStart}>
-          <span>Start Operation</span>
+          <span>开始行动</span>
           <b>→</b>
         </button>
         <div className="start-footer">
-          <span>BUILD 01.26</span>
-          <span>STATUS / READY</span>
-          <span>NO EXTERNAL SYSTEMS</span>
+          <span>版本 / 01.26</span>
+          <span>状态 / 就绪</span>
+          <span>纯前端独立运行</span>
         </div>
       </div>
     </main>

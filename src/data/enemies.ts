@@ -3,7 +3,7 @@ import type { EnemyDefinition, EnemyId } from '../types/game'
 export const ENEMY_DEFINITIONS: Record<EnemyId, EnemyDefinition> = {
   runner: {
     id: 'runner',
-    name: 'Runner',
+    name: '疾行体',
     maxHp: 180,
     attack: 35,
     attackInterval: 800,
@@ -14,7 +14,7 @@ export const ENEMY_DEFINITIONS: Record<EnemyId, EnemyDefinition> = {
   },
   soldier: {
     id: 'soldier',
-    name: 'Soldier',
+    name: '作战体',
     maxHp: 350,
     attack: 50,
     attackInterval: 1200,
@@ -25,7 +25,7 @@ export const ENEMY_DEFINITIONS: Record<EnemyId, EnemyDefinition> = {
   },
   heavy: {
     id: 'heavy',
-    name: 'Heavy',
+    name: '重装体',
     maxHp: 900,
     attack: 80,
     attackInterval: 1500,
@@ -36,7 +36,7 @@ export const ENEMY_DEFINITIONS: Record<EnemyId, EnemyDefinition> = {
   },
   'prototype-boss': {
     id: 'prototype-boss',
-    name: 'Prototype Boss',
+    name: '原型首领',
     maxHp: 3000,
     attack: 120,
     attackInterval: 1800,

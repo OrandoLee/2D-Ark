@@ -27,12 +27,12 @@ export function GridDefenseGame() {
       <section className="game-terminal" onClick={(event) => event.stopPropagation()}>
         <div className="terminal-heading">
           <div>
-            <span className="eyebrow">DELEE LAB / ACTIVE EXPERIMENT</span>
+            <span className="eyebrow">DELEE LAB / 实验运行中</span>
             <h1>GRID DEFENSE: LAB-01</h1>
           </div>
           <div className="signal">
             <span />
-            LIVE
+            在线
           </div>
         </div>
 
@@ -51,8 +51,8 @@ export function GridDefenseGame() {
             />
             {state.isPaused && (
               <div className="pause-screen">
-                <span>SIMULATION PAUSED</span>
-                <button onClick={actions.togglePause}>Resume Operation</button>
+                <span>模拟已暂停</span>
+                <button onClick={actions.togglePause}>继续行动</button>
               </div>
             )}
             {state.message && <div className="system-message">{state.message}</div>}
@@ -60,11 +60,11 @@ export function GridDefenseGame() {
 
           <aside className="side-rail">
             <div className="rail-block">
-              <span className="rail-label">Operation Feed</span>
+              <span className="rail-label">行动监测</span>
               <strong>
                 {state.intermission > 0
-                  ? `NEXT WAVE / ${Math.max(0, 3 - state.intermission).toFixed(1)}s`
-                  : `HOSTILES / ${String(state.enemies.length).padStart(2, '0')}`}
+                  ? `下一波 / ${Math.max(0, 3 - state.intermission).toFixed(1)} 秒`
+                  : `场上敌人 / ${String(state.enemies.length).padStart(2, '0')}`}
               </strong>
               <div className="wave-track">
                 <span style={{ width: `${((state.currentWave + 1) / 5) * 100}%` }} />

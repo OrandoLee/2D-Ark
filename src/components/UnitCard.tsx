@@ -8,6 +8,12 @@ interface UnitCardProps {
 }
 
 export function UnitCard({ unit, selected, disabled, onSelect }: UnitCardProps) {
+  const typeNames = {
+    melee: '近战',
+    ranged: '远程',
+    medic: '医疗',
+  }
+
   return (
     <button
       className={`unit-card ${selected ? 'selected' : ''}`}
@@ -20,10 +26,10 @@ export function UnitCard({ unit, selected, disabled, onSelect }: UnitCardProps) 
       </span>
       <span className="card-copy">
         <strong>{unit.name}</strong>
-        <small>{unit.type} / R{unit.range}</small>
+        <small>{typeNames[unit.type]} / 范围 {unit.range}</small>
       </span>
       <span className="card-stat">
-        {unit.type === 'medic' ? `HEAL ${unit.heal}` : `ATK ${unit.attack}`}
+        {unit.type === 'medic' ? `治疗 ${unit.heal}` : `攻击 ${unit.attack}`}
       </span>
     </button>
   )

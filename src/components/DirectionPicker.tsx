@@ -7,32 +7,32 @@ interface DirectionPickerProps {
 }
 
 export function DirectionPicker({ cell, onChoose, onCancel }: DirectionPickerProps) {
-  const options: { value: Direction; symbol: string }[] = [
-    { value: 'up', symbol: '↑' },
-    { value: 'left', symbol: '←' },
-    { value: 'right', symbol: '→' },
-    { value: 'down', symbol: '↓' },
+  const options: { value: Direction; symbol: string; label: string }[] = [
+    { value: 'up', symbol: '↑', label: '向上' },
+    { value: 'left', symbol: '←', label: '向左' },
+    { value: 'right', symbol: '→', label: '向右' },
+    { value: 'down', symbol: '↓', label: '向下' },
   ]
 
   return (
     <div className="modal-backdrop" onClick={onCancel}>
       <div className="direction-picker" onClick={(event) => event.stopPropagation()}>
-        <span className="eyebrow">Orientation Required</span>
-        <h2>Select attack vector</h2>
+        <span className="eyebrow">需要设定朝向</span>
+        <h2>选择攻击方向</h2>
         <p>
-          Target cell {String.fromCharCode(65 + cell.row)}
+          目标格 {String.fromCharCode(65 + cell.row)}
           {String(cell.col + 1).padStart(2, '0')}
         </p>
         <div className="direction-grid">
           {options.map((option) => (
             <button key={option.value} onClick={() => onChoose(option.value)}>
               <b>{option.symbol}</b>
-              <span>{option.value}</span>
+              <span>{option.label}</span>
             </button>
           ))}
         </div>
         <button className="text-button" onClick={onCancel}>
-          Cancel deployment
+          取消部署
         </button>
       </div>
     </div>

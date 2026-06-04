@@ -26,7 +26,7 @@ export function GameBoard({ state, onCellClick }: GameBoardProps) {
         ))}
       </div>
 
-      <div className="game-board" role="grid" aria-label="12 by 8 tactical grid">
+      <div className="game-board" role="grid" aria-label="十二列八行战术格子地图">
         {MAP_CELLS.map((cell) => {
           const unit = state.deployedUnits.find(
             (item) => item.row === cell.row && item.col === cell.col,

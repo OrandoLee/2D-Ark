@@ -3,7 +3,7 @@ import type { UnitDefinition, UnitId } from '../types/game'
 export const UNIT_DEFINITIONS: Record<UnitId, UnitDefinition> = {
   'vanguard-blade': {
     id: 'vanguard-blade',
-    name: 'Vanguard Blade',
+    name: '先锋刃锋',
     callsign: 'VB',
     type: 'melee',
     deployOn: ['blue'],
@@ -14,11 +14,11 @@ export const UNIT_DEFINITIONS: Record<UnitId, UnitDefinition> = {
     range: 1,
     block: 1,
     damageType: 'physical',
-    description: 'Basic melee strike module.',
+    description: '基础近战输出模块，可阻挡一名敌人。',
   },
   'iron-wall': {
     id: 'iron-wall',
-    name: 'Iron Wall',
+    name: '铁壁',
     callsign: 'IW',
     type: 'melee',
     deployOn: ['blue'],
@@ -29,11 +29,11 @@ export const UNIT_DEFINITIONS: Record<UnitId, UnitDefinition> = {
     range: 1,
     block: 3,
     damageType: 'physical',
-    description: 'Heavy defensive module.',
+    description: '高耐久防御模块，可同时阻挡三名敌人。',
   },
   longshot: {
     id: 'longshot',
-    name: 'Longshot',
+    name: '远射',
     callsign: 'LS',
     type: 'ranged',
     deployOn: ['yellow'],
@@ -44,11 +44,11 @@ export const UNIT_DEFINITIONS: Record<UnitId, UnitDefinition> = {
     range: 3,
     block: 0,
     damageType: 'physical',
-    description: 'Long range physical fire module.',
+    description: '远距离物理火力模块，优先攻击最接近核心的敌人。',
   },
   'pulse-caster': {
     id: 'pulse-caster',
-    name: 'Pulse Caster',
+    name: '脉冲术士',
     callsign: 'PC',
     type: 'ranged',
     deployOn: ['yellow'],
@@ -59,11 +59,11 @@ export const UNIT_DEFINITIONS: Record<UnitId, UnitDefinition> = {
     range: 2,
     block: 0,
     damageType: 'arts',
-    description: 'High impact pulse damage module.',
+    description: '高冲击脉冲伤害模块，擅长处理高防御目标。',
   },
   'field-medic': {
     id: 'field-medic',
-    name: 'Field Medic',
+    name: '战地医疗',
     callsign: 'FM',
     type: 'medic',
     deployOn: ['blue', 'yellow'],
@@ -73,7 +73,7 @@ export const UNIT_DEFINITIONS: Record<UnitId, UnitDefinition> = {
     attackInterval: 1500,
     range: 2,
     block: 0,
-    description: 'Recovery support module.',
+    description: '恢复支援模块，治疗范围内生命比例最低的友方。',
   },
 }
 
