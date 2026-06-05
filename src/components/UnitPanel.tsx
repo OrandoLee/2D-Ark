@@ -1,5 +1,4 @@
 import { UNIT_DEFINITIONS } from '../data/units'
-import { DEPLOY_LIMIT } from '../hooks/useGameState'
 import type { HandSlot, UnitId } from '../types/game'
 import { UnitCard } from './UnitCard'
 
@@ -7,6 +6,7 @@ interface UnitPanelProps {
   dp: number
   deployCount: number
   currentHand: HandSlot[]
+  deployLimit: number
   selectedUnitId?: UnitId
   disabled: boolean
   onSelect: (unitId: UnitId) => void
@@ -19,6 +19,7 @@ export function UnitPanel({
   dp,
   deployCount,
   currentHand,
+  deployLimit,
   selectedUnitId,
   disabled,
   onSelect,
@@ -41,7 +42,7 @@ export function UnitPanel({
               slot={slot}
               unit={unit}
               selected={Boolean(unit && selectedUnitId === unit.id)}
-              disabled={disabled || !unit || dp < unit.cost || deployCount >= DEPLOY_LIMIT}
+              disabled={disabled || !unit || dp < unit.cost || deployCount >= deployLimit}
               onSelect={() => unit && onSelect(unit.id)}
               onPointerDragStart={(x, y) => unit && onPointerDragStart(unit.id, x, y)}
               onPointerDragMove={onPointerDragMove}

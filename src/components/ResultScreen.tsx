@@ -3,9 +3,10 @@ import type { GameState } from '../types/game'
 interface ResultScreenProps {
   state: GameState
   onRestart: () => void
+  onExitPlaytest?: () => void
 }
 
-export function ResultScreen({ state, onRestart }: ResultScreenProps) {
+export function ResultScreen({ state, onRestart, onExitPlaytest }: ResultScreenProps) {
   const rating =
     state.phase === 'defeat' ? 'D' : state.life >= 9 ? 'S' : state.life >= 6 ? 'A' : 'B'
   const time = `${Math.floor(state.elapsedTime / 60)
@@ -17,39 +18,47 @@ export function ResultScreen({ state, onRestart }: ResultScreenProps) {
   return (
     <main className={`result-screen result-${state.phase}`}>
       <div className="result-panel">
-        <span className="eyebrow">DELEE LAB / 行动报告</span>
-        <h1>{state.phase === 'victory' ? '行动完成' : '行动失败'}</h1>
+        <span className="eyebrow">DELEE LAB / Operation Report</span>
+        <h1>{state.phase === 'victory' ? 'Operation Complete' : 'Operation Failed'}</h1>
         <p>
           {state.phase === 'victory'
-            ? '所有敌对信号均已清除，核心保持完整。'
-            : '核心完整度归零，模拟行动已终止。'}
+            ? 'All hostile signals were cleared and the core remained intact.'
+            : 'Core integrity reached zero. The simulation has stopped.'}
         </p>
         <div className="result-stats">
           <div>
-            <span>剩余生命</span>
+            <span>Life</span>
             <strong>{state.life}</strong>
           </div>
           <div>
-            <span>总击杀数</span>
+            <span>Kills</span>
             <strong>{state.kills}</strong>
           </div>
           <div>
-            <span>部署次数</span>
+            <span>Deploys</span>
             <strong>{state.deployCount}</strong>
           </div>
           <div>
-            <span>行动用时</span>
+            <span>Time</span>
             <strong>{time}</strong>
           </div>
         </div>
         <div className="rating">
-          <span>评级</span>
+          <span>Rating</span>
           <strong>{rating}</strong>
         </div>
-        <button className="start-button" onClick={onRestart}>
-          <span>重新开始行动</span>
-          <b>↻</b>
-        </button>
+        <div className="result-actions">
+          <button className="start-button" onClick={onRestart}>
+            <span>Restart</span>
+            <b>-&gt;</b>
+          </button>
+          {onExitPlaytest && (
+            <button className="start-button start-button-secondary" onClick={onExitPlaytest}>
+              <span>Back to Editor</span>
+              <b>-&gt;</b>
+            </button>
+          )}
+        </div>
       </div>
     </main>
   )

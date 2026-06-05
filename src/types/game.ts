@@ -74,6 +74,7 @@ export interface EnemyDefinition {
 export interface Enemy {
   instanceId: string
   definitionId: EnemyId
+  pathId?: string
   hp: number
   pathProgress: number
   x: number
@@ -87,10 +88,12 @@ export interface Enemy {
 export interface WaveSpawn {
   delay: number
   enemyId: EnemyId
+  pathId?: string
 }
 
 export interface Wave {
   id: number
+  delayAfterPreviousWave?: number
   spawns: WaveSpawn[]
 }
 
@@ -118,6 +121,10 @@ export interface HandSlot {
 
 export interface GameState {
   phase: GamePhase
+  level: LevelDefinition
+  mapCells: GridCellData[]
+  path: Point[]
+  waves: Wave[]
   life: number
   dp: number
   currentWave: number
@@ -139,3 +146,4 @@ export interface GameState {
   intermission: number
   dpAccumulator: number
 }
+import type { LevelDefinition } from './level'

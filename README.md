@@ -47,22 +47,122 @@ npm run lint
 
 ## 项目结构
 
-- `src/data/map.ts`：12 × 8 地图格子配置与固定敌人路径。
+- `src/data/defaultLevel.ts`：默认 `LevelDefinition`，包含地图、路径、波次与关卡规则。
+- `src/types/level.ts`：关卡编辑器与游戏本体共用的关卡数据结构。
+- `src/lab/grid-defense/editor/`：可视化关卡编辑器、校验、导入导出与 localStorage 存储。
+- `src/data/map.ts`：从默认关卡派生的兼容地图出口。
 - `src/data/units.ts`：可部署作战模块定义。
 - `src/data/enemies.ts`：敌人属性定义。
-- `src/data/waves.ts`：全部波次与生成时间配置。
+- `src/data/waves.ts`：从默认关卡派生的兼容波次出口。
 - `src/hooks/useGameState.ts`：游戏状态、战斗规则与波次流程。
 - `src/hooks/useGameLoop.ts`：基于 `requestAnimationFrame` 的游戏循环。
 - `src/components/`：独立的游戏界面与棋盘组件。
 - `src/utils/`：伤害、路径插值与范围计算工具。
 
+## Level Editor
+
+关卡编辑器入口：
+
+- 本地开发或支持 history fallback 的部署环境：`/lab/grid-defense/editor`。
+- 游戏开始页也提供 `Level Editor` 按钮，可在游戏模式和编辑器模式之间切换。
+
+编辑器提供完整的本地关卡生产流程：
+
+1. 点击 `New Level` 创建默认 12 列 × 8 行关卡。
+2. 使用 `Blue`、`Yellow`、`Red`、`Spawn`、`Base` 画笔点击或拖拽格子，编辑地图。
+3. 点击 `Add Path`，选择 `Path` 画笔，从 `spawn` 开始，沿相邻 blue 格绘制，最后点到 `base`。
+4. 在 `Level Settings` 中设置名称、描述、难度、初始 Life、初始 DP、DP 回复、部署上限、手牌数量、槽位刷新时间和稀有度权重。
+5. 在 `Wave Editor` 中添加 wave 和 enemy group，配置 `enemyType`、`delay`、`count`、`interval`、`pathId`。
+6. `Validation` 面板实时显示 errors 和 warnings；errors 会阻止 `Playtest`。
+7. 点击 `Playtest` 可直接用当前编辑关卡进入游戏，顶部 `Back to Editor` 会返回并保留编辑内容。
+8. `Export JSON` 会生成完整格式化 `LevelDefinition` JSON；`Import JSON` 可粘贴 JSON 重新载入。
+9. `Save` 和 `Save As New` 使用 `localStorage` 的 `grid-defense-custom-levels` key 保存；刷新页面后可在 `Saved Levels` 中读取、复制或删除。
+
+`LevelDefinition` 主要字段：
+
+- `id`、`name`、`description`、`version`、`author`、`createdAt`、`updatedAt`
+- `difficulty`：`easy | normal | hard | extreme`
+- `rows`、`cols`、`initialLife`、`initialDp`、`dpRegenPerSecond`、`deployLimit`
+- `grid`：二维 `LevelCell[][]`，每格包含 `type`、`isPath`、`pathIds`
+- `paths`：多路径数组，每条路径有 `spawnCell`、`baseCell`、`points`
+- `waves`：波次数组，每个 enemy group 包含 `enemyType`、`delay`、`count`、`interval`、`pathId`
+- `handConfig`：初始手牌、刷新时间、稀有度权重、可选职业限制和禁用单位
+- `tags`：关卡标签
+
+最小 JSON 形态可参考：
+
+```json
+{
+  "id": "sample-level",
+  "name": "Sample Operation",
+  "description": "Minimal custom level.",
+  "version": 1,
+  "author": "DELEE LAB",
+  "createdAt": "2026-06-05T00:00:00.000Z",
+  "updatedAt": "2026-06-05T00:00:00.000Z",
+  "difficulty": "normal",
+  "rows": 8,
+  "cols": 12,
+  "initialLife": 10,
+  "initialDp": 20,
+  "dpRegenPerSecond": 1,
+  "deployLimit": 6,
+  "grid": "Use the editor export for the full 8 x 12 LevelCell matrix.",
+  "paths": [
+    {
+      "id": "main",
+      "name": "Main path",
+      "spawnCell": { "row": 3, "col": 0 },
+      "baseCell": { "row": 3, "col": 11 },
+      "points": [
+        { "row": 3, "col": 0 },
+        { "row": 3, "col": 1 },
+        { "row": 3, "col": 2 },
+        { "row": 3, "col": 11 }
+      ]
+    }
+  ],
+  "waves": [
+    {
+      "id": "wave-1",
+      "name": "Wave 01",
+      "delayAfterPreviousWave": 0,
+      "enemies": [
+        {
+          "id": "runner-group",
+          "enemyType": "runner",
+          "delay": 0,
+          "count": 1,
+          "interval": 1000,
+          "pathId": "main"
+        }
+      ]
+    }
+  ],
+  "handConfig": {
+    "initialHandSize": 5,
+    "slotRefreshMs": 1200,
+    "rarityWeights": {
+      "common": 48,
+      "uncommon": 28,
+      "rare": 16,
+      "epic": 7,
+      "prototype": 1
+    }
+  },
+  "tags": ["custom"]
+}
+```
+
+要把 JSON 作为正式关卡加入游戏，可以把编辑器导出的 JSON 转成 `LevelDefinition` 常量，放入 `src/data/`，再将其作为 `GridDefenseGame` 的 `level` prop 传入；默认游戏继续读取 `src/data/defaultLevel.ts`。
+
 ## 新增地图
 
-参考 `src/data/map.ts` 创建新的地图配置。地图需要提供：
+现在推荐先用 Level Editor 制作并导出 JSON，再转换为 `LevelDefinition`。地图需要提供：
 
 1. 地图行列尺寸。
-2. 一个 `GridCellData[]` 格子数组。
-3. 一个从敌人入口到核心的有序 `Point[]` 路径。
+2. 一个 `LevelCell[][]` 格子矩阵。
+3. 至少一个从敌人入口到核心的有序路径。
 4. 每个格子的类型、是否为路径，以及可部署模块类型。
 
 路径中的每个坐标都必须对应可通行格子。

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { UNIT_DEFINITIONS } from '../data/units'
 import { useGameState } from '../hooks/useGameState'
 import type { UnitId } from '../types/game'
+import type { LevelDefinition } from '../types/level'
 import { DirectionPicker } from './DirectionPicker'
 import { GameBoard } from './GameBoard'
 import { ResultScreen } from './ResultScreen'
@@ -18,6 +19,13 @@ interface DragState {
   cell?: { row: number; col: number }
 }
 
+interface GridDefenseGameProps {
+  level?: LevelDefinition
+  mode?: 'game' | 'playtest'
+  onExitPlaytest?: () => void
+  onOpenEditor?: () => void
+}
+
 function getCellAtPointer(x: number, y: number) {
   const element = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-row][data-col]')
   if (!element) return undefined
@@ -27,8 +35,13 @@ function getCellAtPointer(x: number, y: number) {
   }
 }
 
-export function GridDefenseGame() {
-  const { state, actions } = useGameState()
+export function GridDefenseGame({
+  level,
+  mode = 'game',
+  onExitPlaytest,
+  onOpenEditor,
+}: GridDefenseGameProps) {
+  const { state, actions } = useGameState(level, mode === 'playtest' ? 'playing' : 'start')
   const [dragState, setDragState] = useState<DragState>()
 
   useEffect(() => {
@@ -36,28 +49,44 @@ export function GridDefenseGame() {
   }, [state.pendingDirectionCell, state.selectedUnitId])
 
   if (state.phase === 'start') {
-    return <StartScreen onStart={actions.startGame} />
+    return <StartScreen onStart={actions.startGame} onOpenEditor={onOpenEditor} />
   }
 
   if (state.phase === 'victory' || state.phase === 'defeat') {
-    return <ResultScreen state={state} onRestart={actions.restartGame} />
+    return (
+      <ResultScreen
+        state={state}
+        onRestart={actions.restartGame}
+        onExitPlaytest={mode === 'playtest' ? onExitPlaytest : undefined}
+      />
+    )
   }
 
   const selectedUnit = state.deployedUnits.find(
     (unit) => unit.instanceId === state.selectedDeployedId,
   )
+  const nextWaveDelay = state.waves[state.currentWave + 1]?.delayAfterPreviousWave ?? 3
 
   return (
     <main className="game-shell" onClick={actions.cancelSelection}>
       <section className="game-terminal" onClick={(event) => event.stopPropagation()}>
+        {mode === 'playtest' && (
+          <div className="playtest-ribbon">
+            <span>Testing: {state.level.name}</span>
+            <button onClick={onExitPlaytest}>Back to Editor</button>
+          </div>
+        )}
         <div className="terminal-heading">
           <div>
-            <span className="eyebrow">DELEE LAB / 实验运行中</span>
+            <span className="eyebrow">DELEE LAB / GRID DEFENSE</span>
             <h1>GRID DEFENSE: LAB-01</h1>
           </div>
-          <div className="signal">
-            <span />
-            在线
+          <div className="heading-actions">
+            {onOpenEditor && <button onClick={onOpenEditor}>Level Editor</button>}
+            <div className="signal">
+              <span />
+              Online
+            </div>
           </div>
         </div>
 
@@ -76,13 +105,11 @@ export function GridDefenseGame() {
               dragOverCell={dragState?.cell}
               onCellClick={actions.clickCell}
             />
-            {dragState && (
-              <div className="drag-instruction">将模块拖到高亮格子完成部署</div>
-            )}
+            {dragState && <div className="drag-instruction">Drag to a highlighted grid cell.</div>}
             {state.isPaused && (
               <div className="pause-screen">
-                <span>模拟已暂停</span>
-                <button onClick={actions.togglePause}>继续行动</button>
+                <span>Simulation Paused</span>
+                <button onClick={actions.togglePause}>Resume</button>
               </div>
             )}
             {state.message && <div className="system-message">{state.message}</div>}
@@ -90,16 +117,20 @@ export function GridDefenseGame() {
 
           <aside className="side-rail">
             <div className="rail-block">
-              <span className="rail-label">行动监测</span>
+              <span className="rail-label">Action Monitor</span>
               <strong>
                 {state.waveElapsed < 0
-                  ? `战术准备 / ${Math.ceil(-state.waveElapsed)} 秒`
+                  ? `Prep / ${Math.ceil(-state.waveElapsed)}s`
                   : state.intermission > 0
-                  ? `下一波 / ${Math.max(0, 3 - state.intermission).toFixed(1)} 秒`
-                  : `场上敌人 / ${String(state.enemies.length).padStart(2, '0')}`}
+                    ? `Next wave / ${Math.max(0, nextWaveDelay - state.intermission).toFixed(1)}s`
+                    : `Hostiles / ${String(state.enemies.length).padStart(2, '0')}`}
               </strong>
               <div className="wave-track">
-                <span style={{ width: `${((state.currentWave + 1) / 5) * 100}%` }} />
+                <span
+                  style={{
+                    width: `${((state.currentWave + 1) / Math.max(1, state.waves.length)) * 100}%`,
+                  }}
+                />
               </div>
             </div>
             <UnitInfoPanel unit={selectedUnit} onRetreat={actions.retreatSelected} />
@@ -109,6 +140,7 @@ export function GridDefenseGame() {
         <UnitPanel
           dp={state.dp}
           deployCount={state.deployedUnits.length}
+          deployLimit={state.level.deployLimit}
           currentHand={state.currentHand}
           selectedUnitId={state.selectedUnitId}
           disabled={state.isPaused}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MAP_CELLS, MAP_COLS, MAP_ROWS } from '../data/map'
+import { ENEMY_DEFINITIONS } from '../data/enemies'
 import { UNIT_DEFINITIONS } from '../data/units'
 import type { GameState } from '../types/game'
 import { getFacingCell, manhattanDistance } from '../utils/range'
@@ -25,10 +25,8 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
     : undefined
   const previewCell = dragOverCell ?? hoveredCell
   const previewOrigin =
-    selectedDefinition &&
-    previewCell &&
-    selectedDefinition.type !== 'melee'
-      ? MAP_CELLS.find(
+    selectedDefinition && previewCell && selectedDefinition.type !== 'melee'
+      ? state.mapCells.find(
           (cell) =>
             cell.row === previewCell.row &&
             cell.col === previewCell.col &&
@@ -54,19 +52,30 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
 
   return (
     <div className="board-frame">
-      <div className="board-coordinates board-coordinates-x">
-        {Array.from({ length: MAP_COLS }, (_, index) => (
+      <div
+        className="board-coordinates board-coordinates-x"
+        style={{ gridTemplateColumns: `repeat(${state.level.cols}, 1fr)` }}
+      >
+        {Array.from({ length: state.level.cols }, (_, index) => (
           <span key={index}>{String(index + 1).padStart(2, '0')}</span>
         ))}
       </div>
-      <div className="board-coordinates board-coordinates-y">
-        {Array.from({ length: MAP_ROWS }, (_, index) => (
+      <div
+        className="board-coordinates board-coordinates-y"
+        style={{ gridTemplateRows: `repeat(${state.level.rows}, 1fr)` }}
+      >
+        {Array.from({ length: state.level.rows }, (_, index) => (
           <span key={index}>{String.fromCharCode(65 + index)}</span>
         ))}
       </div>
 
-      <div className="game-board" role="grid" aria-label="十二列八行战术格子地图">
-        {MAP_CELLS.map((cell) => {
+      <div
+        className="game-board"
+        role="grid"
+        aria-label={`${state.level.cols} columns by ${state.level.rows} rows tactical grid`}
+        style={{ gridTemplateColumns: `repeat(${state.level.cols}, 1fr)` }}
+      >
+        {state.mapCells.map((cell) => {
           const unit = state.deployedUnits.find(
             (item) => item.row === cell.row && item.col === cell.col,
           )
@@ -111,8 +120,8 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
                 }`}
                 key={enemy.instanceId}
                 style={{
-                  left: `${((enemy.x + 0.5) / MAP_COLS) * 100}%`,
-                  top: `${((enemy.y + 0.5) / MAP_ROWS) * 100}%`,
+                  left: `${((enemy.x + 0.5) / state.level.cols) * 100}%`,
+                  top: `${((enemy.y + 0.5) / state.level.rows) * 100}%`,
                 }}
               >
                 <span className="hp-track">
@@ -126,7 +135,7 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
 
         <svg
           className="effect-layer"
-          viewBox={`0 0 ${MAP_COLS} ${MAP_ROWS}`}
+          viewBox={`0 0 ${state.level.cols} ${state.level.rows}`}
           preserveAspectRatio="none"
           aria-hidden="true"
         >
@@ -181,8 +190,8 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
 }
 
 const ENEMY_HP = {
-  runner: 180,
-  soldier: 350,
-  heavy: 900,
-  'prototype-boss': 3000,
+  runner: ENEMY_DEFINITIONS.runner.maxHp,
+  soldier: ENEMY_DEFINITIONS.soldier.maxHp,
+  heavy: ENEMY_DEFINITIONS.heavy.maxHp,
+  'prototype-boss': ENEMY_DEFINITIONS['prototype-boss'].maxHp,
 }

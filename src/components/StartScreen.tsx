@@ -1,8 +1,9 @@
 interface StartScreenProps {
   onStart: () => void
+  onOpenEditor?: () => void
 }
 
-export function StartScreen({ onStart }: StartScreenProps) {
+export function StartScreen({ onStart, onOpenEditor }: StartScreenProps) {
   return (
     <main className="start-screen">
       <div className="start-grid" aria-hidden="true">
@@ -11,26 +12,34 @@ export function StartScreen({ onStart }: StartScreenProps) {
         ))}
       </div>
       <div className="start-content">
-        <span className="start-index">实验编号 / 001</span>
+        <span className="start-index">Experiment / 001</span>
         <div className="title-lockup">
-          <span>DELEE LAB 呈现</span>
+          <span>DELEE LAB PRESENTS</span>
           <h1>
             GRID DEFENSE
             <b>LAB-01</b>
           </h1>
         </div>
         <div className="briefing">
-          <span>行动指令</span>
-          <p>部署作战模块，抵御五波敌人，保护核心完整。</p>
+          <span>Directive</span>
+          <p>Deploy tactical modules, resist hostile waves, and keep the core intact.</p>
         </div>
-        <button className="start-button" onClick={onStart}>
-          <span>开始行动</span>
-          <b>→</b>
-        </button>
+        <div className="start-actions">
+          <button className="start-button" onClick={onStart}>
+            <span>Start Operation</span>
+            <b>-&gt;</b>
+          </button>
+          {onOpenEditor && (
+            <button className="start-button start-button-secondary" onClick={onOpenEditor}>
+              <span>Level Editor</span>
+              <b>-&gt;</b>
+            </button>
+          )}
+        </div>
         <div className="start-footer">
-          <span>版本 / 01.26</span>
-          <span>状态 / 就绪</span>
-          <span>纯前端独立运行</span>
+          <span>Version / 01.26</span>
+          <span>Status / Ready</span>
+          <span>Frontend simulation only</span>
         </div>
       </div>
     </main>

@@ -1,48 +1,63 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { defaultLevel } from '../data/defaultLevel'
 import { ENEMY_DEFINITIONS } from '../data/enemies'
-import { getCell, PATH } from '../data/map'
 import { UNIT_DEFINITIONS } from '../data/units'
-import { WAVES } from '../data/waves'
 import type {
   CombatEffect,
   DeployedUnit,
   Direction,
+  GamePhase,
   GameState,
+  GridCellData,
   UnitId,
 } from '../types/game'
+import type { LevelDefinition } from '../types/level'
 import { calculateDamage } from '../utils/combat'
 import { consumeHandSlot, initializeHand, tickHandSlots } from '../utils/drawPool'
+import {
+  expandLevelWaves,
+  getLevelCells,
+  getPrimaryPath,
+  pathIndexForCell,
+  positionOnPath,
+} from '../utils/levelRuntime'
 import { getFacingCell, manhattanDistance } from '../utils/range'
-import { pathIndexForCell, positionOnPath } from '../utils/path'
 import { useGameLoop } from './useGameLoop'
 
-const INITIAL_LIFE = 10
-const INITIAL_DP = 20
-export const DEPLOY_LIMIT = 6
+export const DEPLOY_LIMIT = defaultLevel.deployLimit
 
-const createInitialState = (phase: GameState['phase'] = 'start'): GameState => ({
-  phase,
-  life: INITIAL_LIFE,
-  dp: INITIAL_DP,
-  currentWave: 0,
-  kills: 0,
-  deployedUnits: [],
-  enemies: [],
-  currentHand: phase === 'playing' ? initializeHand() : [],
-  selectedUnitId: undefined,
-  selectedDeployedId: undefined,
-  pendingDirectionCell: undefined,
-  speedMultiplier: 1,
-  isPaused: false,
-  effects: [],
-  message: phase === 'playing' ? '战术准备：4 秒后敌人出现' : undefined,
-  elapsedTime: 0,
-  deployCount: 0,
-  waveElapsed: -4,
-  waveSpawnIndex: 0,
-  intermission: 0,
-  dpAccumulator: 0,
-})
+function createInitialState(level: LevelDefinition, phase: GamePhase = 'start'): GameState {
+  const mapCells = getLevelCells(level)
+  const path = getPrimaryPath(level)
+  const waves = expandLevelWaves(level)
+  return {
+    phase,
+    level,
+    mapCells,
+    path,
+    waves,
+    life: level.initialLife,
+    dp: level.initialDp,
+    currentWave: 0,
+    kills: 0,
+    deployedUnits: [],
+    enemies: [],
+    currentHand: phase === 'playing' ? initializeHand([], level.handConfig) : [],
+    selectedUnitId: undefined,
+    selectedDeployedId: undefined,
+    pendingDirectionCell: undefined,
+    speedMultiplier: 1,
+    isPaused: false,
+    effects: [],
+    message: phase === 'playing' ? 'Tactical prep: contacts in 4 seconds.' : undefined,
+    elapsedTime: 0,
+    deployCount: 0,
+    waveElapsed: -4,
+    waveSpawnIndex: 0,
+    intermission: 0,
+    dpAccumulator: 0,
+  }
+}
 
 function isUnitInHand(state: GameState, unitId: UnitId) {
   return state.currentHand.some((slot) => slot.operatorId === unitId && slot.refreshRemaining === 0)
@@ -50,6 +65,10 @@ function isUnitInHand(state: GameState, unitId: UnitId) {
 
 function hasTag(unitId: UnitId, tag: string) {
   return UNIT_DEFINITIONS[unitId]?.tags.includes(tag) ?? false
+}
+
+function getCell(state: GameState, row: number, col: number): GridCellData | undefined {
+  return state.mapCells.find((cell) => cell.row === row && cell.col === col)
 }
 
 function applyDeploymentTrait(state: GameState, unit: DeployedUnit) {
@@ -88,10 +107,17 @@ function addEffect(
   effects.push({ id, type, fromX, fromY, toX, toY, ttl })
 }
 
-export function useGameState() {
-  const [state, setState] = useState<GameState>(() => createInitialState())
+export function useGameState(level: LevelDefinition = defaultLevel, initialPhase: GamePhase = 'start') {
+  const [state, setState] = useState<GameState>(() => createInitialState(level, initialPhase))
   const idCounter = useRef(0)
+  const levelRef = useRef(level)
   const nextId = useCallback((prefix: string) => `${prefix}-${++idCounter.current}`, [])
+
+  useEffect(() => {
+    levelRef.current = level
+    idCounter.current = 0
+    setState(createInitialState(level, initialPhase))
+  }, [level, initialPhase])
 
   const advanceGame = useCallback(
     (dt: number) => {
@@ -104,7 +130,7 @@ export function useGameState() {
           ...previous,
           elapsedTime: previous.elapsedTime + dt,
           waveElapsed: previous.waveElapsed + dt,
-          dpAccumulator: previous.dpAccumulator + dt,
+          dpAccumulator: previous.dpAccumulator + dt * previous.level.dpRegenPerSecond,
           deployedUnits: previous.deployedUnits.map((unit) => ({
             ...unit,
             blockedEnemyIds: [...unit.blockedEnemyIds],
@@ -118,6 +144,7 @@ export function useGameState() {
             previous.currentHand,
             dt,
             previous.deployedUnits.map((unit) => unit.definitionId),
+            previous.level.handConfig,
           ),
           effects: previous.effects
             .map((effect) => ({ ...effect, ttl: effect.ttl - dt }))
@@ -130,17 +157,25 @@ export function useGameState() {
           next.dpAccumulator -= generatedDp
         }
 
-        const wave = WAVES[next.currentWave]
+        const wave = next.waves[next.currentWave]
+        if (!wave) {
+          next.phase = 'victory'
+          return next
+        }
+
         while (
           next.waveSpawnIndex < wave.spawns.length &&
           wave.spawns[next.waveSpawnIndex].delay <= next.waveElapsed
         ) {
           const spawn = wave.spawns[next.waveSpawnIndex]
-          const position = positionOnPath(0)
+          const path =
+            next.level.paths.find((item) => item.id === spawn.pathId)?.points ?? next.path
+          const position = positionOnPath(path, 0)
           const definition = ENEMY_DEFINITIONS[spawn.enemyId]
           next.enemies.push({
             instanceId: nextId('enemy'),
             definitionId: spawn.enemyId,
+            pathId: spawn.pathId,
             hp: definition.maxHp,
             pathProgress: 0,
             x: position.x,
@@ -161,19 +196,21 @@ export function useGameState() {
             if (!blocker) enemy.blockedByUnitId = undefined
           }
 
+          const path =
+            next.level.paths.find((item) => item.id === enemy.pathId)?.points ?? next.path
           if (!enemy.blockedByUnitId) {
             const definition = ENEMY_DEFINITIONS[enemy.definitionId]
             enemy.pathProgress += definition.speed * dt
-            if (enemy.pathProgress >= PATH.length - 1) {
+            if (enemy.pathProgress >= path.length - 1) {
               leakedIds.add(enemy.instanceId)
               next.life -= definition.leakDamage
               continue
             }
 
-            Object.assign(enemy, positionOnPath(enemy.pathProgress))
+            Object.assign(enemy, positionOnPath(path, enemy.pathProgress))
             const blocker = next.deployedUnits.find((unit) => {
               const unitDefinition = UNIT_DEFINITIONS[unit.definitionId]
-              const pathIndex = pathIndexForCell(unit.row, unit.col)
+              const pathIndex = pathIndexForCell(path, unit.row, unit.col)
               return (
                 unitDefinition.type === 'melee' &&
                 pathIndex >= 0 &&
@@ -183,8 +220,8 @@ export function useGameState() {
             })
             if (blocker) {
               enemy.blockedByUnitId = blocker.instanceId
-              enemy.pathProgress = pathIndexForCell(blocker.row, blocker.col)
-              Object.assign(enemy, positionOnPath(enemy.pathProgress))
+              enemy.pathProgress = pathIndexForCell(path, blocker.row, blocker.col)
+              Object.assign(enemy, positionOnPath(path, enemy.pathProgress))
               blocker.blockedEnemyIds.push(enemy.instanceId)
             }
           }
@@ -248,7 +285,9 @@ export function useGameState() {
             const enemyDefinition = ENEMY_DEFINITIONS[target.definitionId]
             const damage = calculateDamage(
               (definition.attack ?? 0) * traitDamageMultiplier(unit.definitionId, target.definitionId),
-              hasTag(unit.definitionId, 'debuff') ? enemyDefinition.defense * 0.78 : enemyDefinition.defense,
+              hasTag(unit.definitionId, 'debuff')
+                ? enemyDefinition.defense * 0.78
+                : enemyDefinition.defense,
               definition.damageType ?? 'physical',
             )
             target.hp -= damage
@@ -351,21 +390,21 @@ export function useGameState() {
           return next
         }
 
-        const waveComplete =
-          next.waveSpawnIndex >= wave.spawns.length && next.enemies.length === 0
+        const waveComplete = next.waveSpawnIndex >= wave.spawns.length && next.enemies.length === 0
         if (waveComplete) {
-          if (next.currentWave >= WAVES.length - 1) {
+          if (next.currentWave >= next.waves.length - 1) {
             next.phase = 'victory'
             next.selectedUnitId = undefined
             next.pendingDirectionCell = undefined
           } else {
             next.intermission += dt
-            if (next.intermission >= 3) {
+            const waitSeconds = next.waves[next.currentWave + 1]?.delayAfterPreviousWave ?? 3
+            if (next.intermission >= waitSeconds) {
               next.currentWave += 1
               next.waveElapsed = 0
               next.waveSpawnIndex = 0
               next.intermission = 0
-              next.message = `第 ${String(next.currentWave + 1).padStart(2, '0')} 波已启动`
+              next.message = `Wave ${String(next.currentWave + 1).padStart(2, '0')} active.`
             }
           }
         } else {
@@ -393,19 +432,19 @@ export function useGameState() {
     return () => window.clearTimeout(timeout)
   }, [state.message])
 
-  const startGame = () => setState(createInitialState('playing'))
-  const restartGame = () => setState(createInitialState('playing'))
+  const startGame = () => setState(createInitialState(levelRef.current, 'playing'))
+  const restartGame = () => setState(createInitialState(levelRef.current, 'playing'))
 
   const selectUnit = (unitId: UnitId) => {
     setState((current) => {
       if (current.phase !== 'playing' || current.isPaused) return current
       const definition = UNIT_DEFINITIONS[unitId]
       if (!definition || !isUnitInHand(current, unitId)) return current
-      if (current.deployedUnits.length >= DEPLOY_LIMIT) {
-        return { ...current, message: '已达到部署上限' }
+      if (current.deployedUnits.length >= current.level.deployLimit) {
+        return { ...current, message: 'Deploy limit reached.' }
       }
       if (current.dp < definition.cost) {
-        return { ...current, message: 'DP 不足' }
+        return { ...current, message: 'Insufficient DP.' }
       }
       return {
         ...current,
@@ -422,38 +461,38 @@ export function useGameState() {
       if (current.phase !== 'playing' || current.isPaused) return current
       const definition = UNIT_DEFINITIONS[unitId]
       if (!definition || !isUnitInHand(current, unitId)) return current
-      if (current.deployedUnits.length >= DEPLOY_LIMIT) {
-        return { ...current, message: '已达到部署上限' }
+      if (current.deployedUnits.length >= current.level.deployLimit) {
+        return { ...current, message: 'Deploy limit reached.' }
       }
       if (current.dp < definition.cost) {
-        return { ...current, message: 'DP 不足' }
+        return { ...current, message: 'Insufficient DP.' }
       }
       return {
         ...current,
         selectedUnitId: unitId,
         selectedDeployedId: undefined,
         pendingDirectionCell: undefined,
-        message: '拖拽至高亮格子部署',
+        message: 'Drag to a highlighted cell.',
       }
     })
   }
 
   const validateDeployment = (current: GameState, unitId: UnitId, row: number, col: number) => {
     const definition = UNIT_DEFINITIONS[unitId]
-    const cell = getCell(row, col)
-    if (!definition || !isUnitInHand(current, unitId)) return '模块正在刷新'
+    const cell = getCell(current, row, col)
+    if (!definition || !isUnitInHand(current, unitId)) return 'Module is refreshing.'
     if (
       !cell ||
       !cell.deployableTypes.includes(definition.type) ||
       !definition.deployOn.includes(cell.type)
     ) {
-      return '该格无法部署此模块'
+      return 'This module cannot deploy on that cell.'
     }
     if (current.deployedUnits.some((unit) => unit.row === row && unit.col === col)) {
-      return '该格已有模块'
+      return 'Cell already occupied.'
     }
-    if (current.dp < definition.cost) return 'DP 不足'
-    if (current.deployedUnits.length >= DEPLOY_LIMIT) return '已达到部署上限'
+    if (current.dp < definition.cost) return 'Insufficient DP.'
+    if (current.deployedUnits.length >= current.level.deployLimit) return 'Deploy limit reached.'
     return undefined
   }
 
@@ -480,11 +519,11 @@ export function useGameState() {
       dp: current.dp - definition.cost,
       deployedUnits: [...current.deployedUnits, unit],
       deployCount: current.deployCount + 1,
-      currentHand: consumeHandSlot(current.currentHand, unitId),
+      currentHand: consumeHandSlot(current.currentHand, unitId, current.level.handConfig),
       selectedUnitId: undefined,
       selectedDeployedId: unit.instanceId,
       pendingDirectionCell: undefined,
-      message: `${definition.name} 已上线`,
+      message: `${definition.name} deployed.`,
     }
     applyDeploymentTrait(next, unit)
     return next
@@ -501,7 +540,7 @@ export function useGameState() {
           return {
             ...current,
             pendingDirectionCell: { row, col, unitId: current.selectedUnitId },
-            message: '请选择模块朝向',
+            message: 'Choose module facing.',
           }
         }
         return deploy(current, current.selectedUnitId, row, col)
@@ -549,7 +588,7 @@ export function useGameState() {
             : enemy,
         ),
         selectedDeployedId: undefined,
-        message: `模块已撤回 / +${refund} DP`,
+        message: `Module retreated. +${refund} DP`,
       }
     })
   }
