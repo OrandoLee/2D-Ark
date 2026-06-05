@@ -109,6 +109,7 @@ export function GridDefenseGame() {
         <UnitPanel
           dp={state.dp}
           deployCount={state.deployedUnits.length}
+          currentHand={state.currentHand}
           selectedUnitId={state.selectedUnitId}
           disabled={state.isPaused}
           onSelect={actions.selectUnit}

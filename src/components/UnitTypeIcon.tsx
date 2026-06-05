@@ -24,6 +24,24 @@ export function UnitTypeIcon({ type }: UnitTypeIconProps) {
     )
   }
 
+  if (type === 'support') {
+    return (
+      <svg className="type-icon" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M7 17h6l3-7 4 14 3-7h2" />
+        <path d="M8 8h16M8 24h16" />
+      </svg>
+    )
+  }
+
+  if (type === 'trap') {
+    return (
+      <svg className="type-icon" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M7 24 16 6l9 18H7Z" />
+        <path d="M16 13v5M16 22h.01" />
+      </svg>
+    )
+  }
+
   return (
     <svg className="type-icon" viewBox="0 0 32 32" aria-hidden="true">
       <path d="M12 5h8v7h7v8h-7v7h-8v-7H5v-8h7V5Z" />

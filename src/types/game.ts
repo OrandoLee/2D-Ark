@@ -1,14 +1,19 @@
 export type CellType = 'blue' | 'yellow' | 'red' | 'spawn' | 'base'
-export type UnitType = 'melee' | 'ranged' | 'medic'
-export type DamageType = 'physical' | 'arts'
+export type UnitType = 'melee' | 'ranged' | 'medic' | 'support' | 'trap'
+export type DamageType = 'physical' | 'arts' | 'heal' | 'none'
 export type Direction = 'up' | 'down' | 'left' | 'right'
 export type EnemyId = 'runner' | 'soldier' | 'heavy' | 'prototype-boss'
-export type UnitId =
-  | 'vanguard-blade'
-  | 'iron-wall'
-  | 'longshot'
-  | 'pulse-caster'
-  | 'field-medic'
+export type UnitId = string
+export type ClassType =
+  | 'vanguard'
+  | 'guard'
+  | 'defender'
+  | 'sniper'
+  | 'caster'
+  | 'medic'
+  | 'supporter'
+  | 'specialist'
+export type OperatorRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'prototype'
 export type GamePhase = 'start' | 'playing' | 'victory' | 'defeat'
 
 export interface Point {
@@ -24,9 +29,13 @@ export interface GridCellData extends Point {
 
 export interface UnitDefinition {
   id: UnitId
+  cnName: string
+  enName: string
   name: string
   callsign: string
+  classType: ClassType
   type: UnitType
+  rarity: OperatorRarity
   deployOn: CellType[]
   cost: number
   maxHp: number
@@ -36,6 +45,8 @@ export interface UnitDefinition {
   range: number
   block: number
   damageType?: DamageType
+  trait: string
+  tags: string[]
   description: string
 }
 
@@ -97,6 +108,14 @@ export interface PendingCell extends Point {
   unitId: UnitId
 }
 
+export interface HandSlot {
+  slotId: string
+  operatorId: UnitId | null
+  refreshRemaining: number
+  lastOperatorId?: UnitId
+  locked?: boolean
+}
+
 export interface GameState {
   phase: GamePhase
   life: number
@@ -105,6 +124,7 @@ export interface GameState {
   kills: number
   deployedUnits: DeployedUnit[]
   enemies: Enemy[]
+  currentHand: HandSlot[]
   selectedUnitId?: UnitId
   selectedDeployedId?: string
   pendingDirectionCell?: PendingCell

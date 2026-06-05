@@ -1,11 +1,12 @@
-import { UNIT_LIST } from '../data/units'
+import { UNIT_DEFINITIONS } from '../data/units'
 import { DEPLOY_LIMIT } from '../hooks/useGameState'
-import type { UnitId } from '../types/game'
+import type { HandSlot, UnitId } from '../types/game'
 import { UnitCard } from './UnitCard'
 
 interface UnitPanelProps {
   dp: number
   deployCount: number
+  currentHand: HandSlot[]
   selectedUnitId?: UnitId
   disabled: boolean
   onSelect: (unitId: UnitId) => void
@@ -17,6 +18,7 @@ interface UnitPanelProps {
 export function UnitPanel({
   dp,
   deployCount,
+  currentHand,
   selectedUnitId,
   disabled,
   onSelect,
@@ -31,18 +33,22 @@ export function UnitPanel({
         <span>拖拽模块至格子 → 移动鼠标设定朝向</span>
       </div>
       <div className="unit-card-row">
-        {UNIT_LIST.map((unit) => (
-          <UnitCard
-            key={unit.id}
-            unit={unit}
-            selected={selectedUnitId === unit.id}
-            disabled={disabled || dp < unit.cost || deployCount >= DEPLOY_LIMIT}
-            onSelect={() => onSelect(unit.id)}
-            onPointerDragStart={(x, y) => onPointerDragStart(unit.id, x, y)}
-            onPointerDragMove={onPointerDragMove}
-            onPointerDragEnd={onPointerDragEnd}
-          />
-        ))}
+        {currentHand.map((slot) => {
+          const unit = slot.operatorId ? UNIT_DEFINITIONS[slot.operatorId] : undefined
+          return (
+            <UnitCard
+              key={slot.slotId}
+              slot={slot}
+              unit={unit}
+              selected={Boolean(unit && selectedUnitId === unit.id)}
+              disabled={disabled || !unit || dp < unit.cost || deployCount >= DEPLOY_LIMIT}
+              onSelect={() => unit && onSelect(unit.id)}
+              onPointerDragStart={(x, y) => unit && onPointerDragStart(unit.id, x, y)}
+              onPointerDragMove={onPointerDragMove}
+              onPointerDragEnd={onPointerDragEnd}
+            />
+          )
+        })}
       </div>
     </div>
   )

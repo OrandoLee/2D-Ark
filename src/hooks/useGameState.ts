@@ -11,6 +11,7 @@ import type {
   UnitId,
 } from '../types/game'
 import { calculateDamage } from '../utils/combat'
+import { consumeHandSlot, initializeHand, tickHandSlots } from '../utils/drawPool'
 import { getFacingCell, manhattanDistance } from '../utils/range'
 import { pathIndexForCell, positionOnPath } from '../utils/path'
 import { useGameLoop } from './useGameLoop'
@@ -27,6 +28,7 @@ const createInitialState = (phase: GameState['phase'] = 'start'): GameState => (
   kills: 0,
   deployedUnits: [],
   enemies: [],
+  currentHand: phase === 'playing' ? initializeHand() : [],
   selectedUnitId: undefined,
   selectedDeployedId: undefined,
   pendingDirectionCell: undefined,
@@ -41,6 +43,37 @@ const createInitialState = (phase: GameState['phase'] = 'start'): GameState => (
   intermission: 0,
   dpAccumulator: 0,
 })
+
+function isUnitInHand(state: GameState, unitId: UnitId) {
+  return state.currentHand.some((slot) => slot.operatorId === unitId && slot.refreshRemaining === 0)
+}
+
+function hasTag(unitId: UnitId, tag: string) {
+  return UNIT_DEFINITIONS[unitId]?.tags.includes(tag) ?? false
+}
+
+function applyDeploymentTrait(state: GameState, unit: DeployedUnit) {
+  const definition = UNIT_DEFINITIONS[unit.definitionId]
+  if (definition.tags.includes('dp') && definition.trait.includes('部署')) {
+    state.dp += 2
+  }
+  if (definition.tags.includes('stun')) {
+    for (const enemy of state.enemies) {
+      if (manhattanDistance(unit, enemy) <= Math.max(1, definition.range)) {
+        enemy.cooldown = Math.max(enemy.cooldown, 700)
+      }
+    }
+  }
+}
+
+function traitDamageMultiplier(unitId: UnitId, enemyDefinitionId: string) {
+  const definition = UNIT_DEFINITIONS[unitId]
+  if (definition.tags.includes('anti-runner') && enemyDefinitionId === 'runner') return 1.45
+  if (definition.tags.includes('anti-heavy') && enemyDefinitionId === 'heavy') return 1.4
+  if (definition.tags.includes('anti-armor')) return 1.25
+  if (definition.tags.includes('buff')) return 1.12
+  return 1
+}
 
 function addEffect(
   effects: CombatEffect[],
@@ -81,6 +114,11 @@ export function useGameState() {
             ...enemy,
             cooldown: Math.max(0, enemy.cooldown - dt * 1000),
           })),
+          currentHand: tickHandSlots(
+            previous.currentHand,
+            dt,
+            previous.deployedUnits.map((unit) => unit.definitionId),
+          ),
           effects: previous.effects
             .map((effect) => ({ ...effect, ttl: effect.ttl - dt }))
             .filter((effect) => effect.ttl > 0),
@@ -188,7 +226,11 @@ export function useGameState() {
 
           const candidates = next.enemies
             .filter((enemy) => {
-              if (definition.type === 'ranged') {
+              if (
+                definition.type === 'ranged' ||
+                definition.type === 'support' ||
+                definition.type === 'trap'
+              ) {
                 return (
                   Math.abs(unit.row - enemy.y) + Math.abs(unit.col - enemy.x) <= definition.range
                 )
@@ -205,18 +247,35 @@ export function useGameState() {
           if (target) {
             const enemyDefinition = ENEMY_DEFINITIONS[target.definitionId]
             const damage = calculateDamage(
-              definition.attack ?? 0,
-              enemyDefinition.defense,
+              (definition.attack ?? 0) * traitDamageMultiplier(unit.definitionId, target.definitionId),
+              hasTag(unit.definitionId, 'debuff') ? enemyDefinition.defense * 0.78 : enemyDefinition.defense,
               definition.damageType ?? 'physical',
             )
             target.hp -= damage
+            if (definition.tags.includes('splash')) {
+              for (const enemy of next.enemies) {
+                if (enemy.instanceId !== target.instanceId && manhattanDistance(enemy, target) <= 1) {
+                  enemy.hp -= damage * 0.35
+                }
+              }
+            }
+            if (definition.tags.includes('slow') || definition.tags.includes('aoe-slow')) {
+              target.pathProgress = Math.max(0, target.pathProgress - 0.12)
+              target.cooldown = Math.max(target.cooldown, 180)
+            }
+            if (definition.tags.includes('stun') || definition.tags.includes('control')) {
+              target.cooldown = Math.max(target.cooldown, 550)
+            }
+            if (definition.tags.includes('trap')) {
+              unit.hp = 0
+            }
             unit.cooldown = definition.attackInterval
             addEffect(
               next.effects,
               nextId('fx'),
               definition.damageType === 'arts'
                 ? 'arts'
-                : definition.type === 'ranged'
+                : definition.type === 'ranged' || definition.type === 'support'
                   ? 'shot'
                   : 'attack',
               unit.col,
@@ -248,6 +307,9 @@ export function useGameState() {
             if (defeatedEnemyIds.has(enemy.instanceId)) {
               next.dp += ENEMY_DEFINITIONS[enemy.definitionId].rewardDp
               next.kills += 1
+              if (next.deployedUnits.some((unit) => hasTag(unit.definitionId, 'dp'))) {
+                next.dp += 1
+              }
             }
           }
           for (const unit of next.deployedUnits) {
@@ -270,6 +332,13 @@ export function useGameState() {
           }
           if (next.selectedDeployedId && defeatedUnitIds.has(next.selectedDeployedId)) {
             next.selectedDeployedId = undefined
+          }
+        }
+
+        for (const unit of next.deployedUnits) {
+          if (hasTag(unit.definitionId, 'regen')) {
+            const definition = UNIT_DEFINITIONS[unit.definitionId]
+            unit.hp = Math.min(definition.maxHp, unit.hp + 8 * dt)
           }
         }
 
@@ -331,6 +400,7 @@ export function useGameState() {
     setState((current) => {
       if (current.phase !== 'playing' || current.isPaused) return current
       const definition = UNIT_DEFINITIONS[unitId]
+      if (!definition || !isUnitInHand(current, unitId)) return current
       if (current.deployedUnits.length >= DEPLOY_LIMIT) {
         return { ...current, message: '已达到部署上限' }
       }
@@ -351,6 +421,7 @@ export function useGameState() {
     setState((current) => {
       if (current.phase !== 'playing' || current.isPaused) return current
       const definition = UNIT_DEFINITIONS[unitId]
+      if (!definition || !isUnitInHand(current, unitId)) return current
       if (current.deployedUnits.length >= DEPLOY_LIMIT) {
         return { ...current, message: '已达到部署上限' }
       }
@@ -370,7 +441,14 @@ export function useGameState() {
   const validateDeployment = (current: GameState, unitId: UnitId, row: number, col: number) => {
     const definition = UNIT_DEFINITIONS[unitId]
     const cell = getCell(row, col)
-    if (!cell || !cell.deployableTypes.includes(definition.type)) return '该格无法部署此模块'
+    if (!definition || !isUnitInHand(current, unitId)) return '模块正在刷新'
+    if (
+      !cell ||
+      !cell.deployableTypes.includes(definition.type) ||
+      !definition.deployOn.includes(cell.type)
+    ) {
+      return '该格无法部署此模块'
+    }
     if (current.deployedUnits.some((unit) => unit.row === row && unit.col === col)) {
       return '该格已有模块'
     }
@@ -397,16 +475,19 @@ export function useGameState() {
       blockedEnemyIds: [],
       cooldown: 250,
     }
-    return {
+    const next = {
       ...current,
       dp: current.dp - definition.cost,
       deployedUnits: [...current.deployedUnits, unit],
       deployCount: current.deployCount + 1,
+      currentHand: consumeHandSlot(current.currentHand, unitId),
       selectedUnitId: undefined,
       selectedDeployedId: unit.instanceId,
       pendingDirectionCell: undefined,
       message: `${definition.name} 已上线`,
     }
+    applyDeploymentTrait(next, unit)
+    return next
   }
 
   const clickCell = (row: number, col: number) => {
@@ -454,7 +535,8 @@ export function useGameState() {
         (item) => item.instanceId === current.selectedDeployedId,
       )
       if (!unit) return current
-      const refund = Math.floor(UNIT_DEFINITIONS[unit.definitionId].cost * 0.5)
+      const definition = UNIT_DEFINITIONS[unit.definitionId]
+      const refund = Math.floor(definition.cost * (definition.tags.includes('retreat') ? 0.8 : 0.5))
       return {
         ...current,
         dp: current.dp + refund,

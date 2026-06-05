@@ -48,8 +48,8 @@ function getType(row: number, col: number): CellType {
 }
 
 function getDeployableTypes(type: CellType, isPath: boolean): UnitType[] {
-  if (type === 'yellow') return ['ranged', 'medic']
-  if (type === 'blue') return isPath ? ['melee'] : ['melee', 'medic']
+  if (type === 'yellow') return ['melee', 'ranged', 'medic', 'support']
+  if (type === 'blue') return isPath ? ['melee', 'trap'] : ['melee', 'medic', 'support', 'trap']
   return []
 }
 

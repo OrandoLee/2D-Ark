@@ -27,12 +27,13 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
   const previewOrigin =
     selectedDefinition &&
     previewCell &&
-    (selectedDefinition.type === 'ranged' || selectedDefinition.type === 'medic')
+    selectedDefinition.type !== 'melee'
       ? MAP_CELLS.find(
           (cell) =>
             cell.row === previewCell.row &&
             cell.col === previewCell.col &&
             cell.deployableTypes.includes(selectedDefinition.type) &&
+            selectedDefinition.deployOn.includes(cell.type) &&
             !state.deployedUnits.some(
               (unit) => unit.row === previewCell.row && unit.col === previewCell.col,
             ),
@@ -70,7 +71,9 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
             (item) => item.row === cell.row && item.col === cell.col,
           )
           const isLegal = selectedDefinition
-            ? cell.deployableTypes.includes(selectedDefinition.type) && !unit
+            ? cell.deployableTypes.includes(selectedDefinition.type) &&
+              selectedDefinition.deployOn.includes(cell.type) &&
+              !unit
             : undefined
           const isInPreviewRange = isCellInRange(cell)
           return (

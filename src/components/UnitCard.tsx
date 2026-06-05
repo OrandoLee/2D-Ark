@@ -1,9 +1,10 @@
 import { useRef } from 'react'
-import type { UnitDefinition } from '../types/game'
+import type { HandSlot, UnitDefinition } from '../types/game'
 import { UnitTypeIcon } from './UnitTypeIcon'
 
 interface UnitCardProps {
-  unit: UnitDefinition
+  slot: HandSlot
+  unit?: UnitDefinition
   selected: boolean
   disabled: boolean
   onSelect: () => void
@@ -12,7 +13,35 @@ interface UnitCardProps {
   onPointerDragEnd: (x: number, y: number) => void
 }
 
+const typeNames = {
+  melee: '近战',
+  ranged: '远程',
+  medic: '医疗',
+  support: '辅助',
+  trap: '陷阱',
+}
+
+const classNames = {
+  vanguard: '先锋',
+  guard: '近卫',
+  defender: '重装',
+  sniper: '狙击',
+  caster: '术士',
+  medic: '医疗',
+  supporter: '辅助',
+  specialist: '特种',
+}
+
+const rarityNames = {
+  common: 'COMMON',
+  uncommon: 'UNCOMMON',
+  rare: 'RARE',
+  epic: 'EPIC',
+  prototype: 'PROTOTYPE',
+}
+
 export function UnitCard({
+  slot,
   unit,
   selected,
   disabled,
@@ -23,15 +52,24 @@ export function UnitCard({
 }: UnitCardProps) {
   const pointerStart = useRef<{ x: number; y: number } | undefined>(undefined)
   const isDragging = useRef(false)
-  const typeNames = {
-    melee: '近战',
-    ranged: '远程',
-    medic: '医疗',
+  const refreshing = slot.refreshRemaining > 0
+  const progress = Math.max(0, Math.min(1, 1 - slot.refreshRemaining / 1.2))
+
+  if (!unit || refreshing) {
+    return (
+      <button className="unit-card unit-card-refreshing" disabled>
+        <span className="card-refresh-title">刷新中</span>
+        <span className="card-refresh-code">{slot.slotId.toUpperCase()}</span>
+        <span className="refresh-track">
+          <span style={{ width: `${progress * 100}%` }} />
+        </span>
+      </button>
+    )
   }
 
   return (
     <button
-      className={`unit-card type-${unit.type} ${selected ? 'selected' : ''}`}
+      className={`unit-card type-${unit.type} rarity-${unit.rarity} ${selected ? 'selected' : ''}`}
       disabled={disabled}
       onClick={() => {
         if (!isDragging.current) onSelect()
@@ -45,7 +83,10 @@ export function UnitCard({
       onPointerMove={(event) => {
         const start = pointerStart.current
         if (!start) return
-        if (!isDragging.current && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6) {
+        if (
+          !isDragging.current &&
+          Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6
+        ) {
           isDragging.current = true
           onPointerDragStart(event.clientX, event.clientY)
         }
@@ -68,15 +109,19 @@ export function UnitCard({
         <UnitTypeIcon type={unit.type} />
       </span>
       <span className="card-copy">
-        <strong>{unit.name}</strong>
+        <strong>{unit.cnName}</strong>
+        <em>{unit.enName}</em>
         <small>
-          <b>{typeNames[unit.type]}</b>
-          <span>范围 {unit.range}</span>
+          <b>{classNames[unit.classType]}</b>
+          <span>{typeNames[unit.type]}</span>
+          <span>{rarityNames[unit.rarity]}</span>
         </small>
       </span>
       <span className="card-stat">
-        {unit.type === 'medic' ? `治疗 ${unit.heal}` : `攻击 ${unit.attack}`}
+        <span>{unit.type === 'medic' ? `治疗 ${unit.heal}` : `攻击 ${unit.attack ?? 0}`}</span>
+        <span>范围 {unit.range}</span>
       </span>
+      <span className="card-trait">{unit.trait}</span>
     </button>
   )
 }

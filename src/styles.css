@@ -1407,6 +1407,8 @@ button:focus-visible {
 .type-melee { --unit-accent: #ff9178; }
 .type-ranged { --unit-accent: #72a7ff; }
 .type-medic { --unit-accent: #79e6b1; }
+.type-support { --unit-accent: #d6d9df; }
+.type-trap { --unit-accent: #e4c85a; }
 
 .card-icon {
   width: 46px;
@@ -1448,6 +1450,16 @@ button:focus-visible {
   font-weight: 600;
 }
 
+.card-copy em {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  color: #9aa0a9;
+  font: normal 10px "IBM Plex Mono", monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .card-copy small,
 .card-stat {
   font-family: "Microsoft YaHei", sans-serif;
@@ -1468,7 +1480,87 @@ button:focus-visible {
 }
 
 .card-stat {
+  display: flex;
+  gap: 10px;
   color: #d5d8de;
+}
+
+.card-trait {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: #aeb3bb;
+  font: 11px/1.35 "Microsoft YaHei", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rarity-uncommon {
+  border-color: rgba(255,255,255,.2);
+}
+
+.rarity-rare {
+  border-color: rgba(255,255,255,.34);
+}
+
+.rarity-epic {
+  border-color: rgba(255,255,255,.56);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
+.rarity-prototype {
+  border-color: rgba(255,255,255,.78);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), 0 0 18px rgba(255,255,255,.08);
+}
+
+.unit-card-refreshing {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-content: center;
+  gap: 8px;
+  opacity: .78 !important;
+}
+
+.card-refresh-title,
+.card-refresh-code {
+  display: block;
+  text-align: center;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+.card-refresh-title {
+  color: #d8dce2;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card-refresh-code {
+  color: var(--muted);
+  font: 10px "IBM Plex Mono", monospace;
+}
+
+.refresh-track {
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(255,255,255,.12);
+}
+
+.refresh-track span {
+  display: block;
+  height: 100%;
+  background: #d8dce2;
+}
+
+.range-preview-support {
+  box-shadow:
+    inset 0 0 0 999px rgba(255, 255, 255, .13),
+    inset 0 0 0 1px rgba(255, 255, 255, .64);
+}
+
+.range-preview-trap {
+  box-shadow:
+    inset 0 0 0 999px rgba(228, 200, 90, .16),
+    inset 0 0 0 1px rgba(228, 200, 90, .72);
 }
 
 .deployed-unit .unit-mark {
