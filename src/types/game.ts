@@ -85,7 +85,7 @@ export interface Wave {
 
 export interface CombatEffect {
   id: string
-  type: 'attack' | 'arts' | 'heal' | 'impact'
+  type: 'attack' | 'shot' | 'arts' | 'heal' | 'impact'
   fromX: number
   fromY: number
   toX: number

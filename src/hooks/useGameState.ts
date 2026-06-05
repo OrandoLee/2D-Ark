@@ -213,7 +213,11 @@ export function useGameState() {
             addEffect(
               next.effects,
               nextId('fx'),
-              definition.damageType === 'arts' ? 'arts' : 'attack',
+              definition.damageType === 'arts'
+                ? 'arts'
+                : definition.type === 'ranged'
+                  ? 'shot'
+                  : 'attack',
               unit.col,
               unit.row,
               target.x,

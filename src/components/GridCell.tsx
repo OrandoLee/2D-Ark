@@ -1,14 +1,19 @@
 import { UNIT_DEFINITIONS } from '../data/units'
-import type { DeployedUnit, GridCellData } from '../types/game'
+import type { DeployedUnit, GridCellData, UnitType } from '../types/game'
 import { UnitTypeIcon } from './UnitTypeIcon'
 
 interface GridCellProps {
   cell: GridCellData
   unit?: DeployedUnit
   isLegal?: boolean
+  isInPreviewRange: boolean
+  isPreviewOrigin: boolean
+  previewType?: UnitType
   isDragging: boolean
   isDragOver: boolean
   isSelected: boolean
+  onPointerEnter: () => void
+  onPointerLeave: () => void
   onClick: () => void
 }
 
@@ -16,9 +21,14 @@ export function GridCell({
   cell,
   unit,
   isLegal,
+  isInPreviewRange,
+  isPreviewOrigin,
+  previewType,
   isDragging,
   isDragOver,
   isSelected,
+  onPointerEnter,
+  onPointerLeave,
   onClick,
 }: GridCellProps) {
   const definition = unit ? UNIT_DEFINITIONS[unit.definitionId] : undefined
@@ -39,10 +49,15 @@ export function GridCell({
         cell.isPath ? 'cell-path' : '',
         isLegal === true ? 'deploy-legal' : '',
         isLegal === false ? 'deploy-illegal' : '',
+        isInPreviewRange ? 'range-preview' : '',
+        isInPreviewRange && previewType ? `range-preview-${previewType}` : '',
+        isPreviewOrigin ? 'range-origin' : '',
         isDragging ? 'drag-active' : '',
         isDragOver ? 'drop-target' : '',
         isSelected ? 'cell-selected' : '',
       ].join(' ')}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       onClick={onClick}
       data-row={cell.row}
       data-col={cell.col}
