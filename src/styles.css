@@ -345,11 +345,31 @@ button:focus-visible {
     inset 0 0 0 1px rgba(178, 209, 255, .72);
 }
 
+.range-selected {
+  z-index: 2;
+  box-shadow:
+    inset 0 0 0 999px rgba(114, 167, 255, .2),
+    inset 0 0 0 2px rgba(191, 226, 255, .86),
+    0 0 13px rgba(114,167,255,.25);
+}
+
 .range-preview::after {
   position: absolute;
   inset: 18%;
   border: 1px solid rgba(221, 235, 255, .5);
   background: rgba(114, 167, 255, .08);
+  content: "";
+  pointer-events: none;
+}
+
+.range-selected::after {
+  position: absolute;
+  inset: 13%;
+  border: 1px solid rgba(221, 235, 255, .68);
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(221,235,255,.58) 47% 53%, transparent 53%),
+    linear-gradient(transparent 47%, rgba(221,235,255,.58) 47% 53%, transparent 53%),
+    rgba(114, 167, 255, .1);
   content: "";
   pointer-events: none;
 }
@@ -360,9 +380,39 @@ button:focus-visible {
     inset 0 0 0 1px rgba(142, 231, 188, .76);
 }
 
+.range-selected.range-preview-medic {
+  box-shadow:
+    inset 0 0 0 999px rgba(74, 231, 161, .2),
+    inset 0 0 0 2px rgba(151, 255, 209, .88),
+    0 0 13px rgba(74,231,161,.28);
+}
+
 .range-preview-medic::after {
   border-color: rgba(151, 255, 209, .58);
   background: rgba(74, 231, 161, .09);
+}
+
+.range-selected.range-preview-medic::after {
+  border-color: rgba(151, 255, 209, .7);
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(151,255,209,.58) 47% 53%, transparent 53%),
+    linear-gradient(transparent 47%, rgba(151,255,209,.58) 47% 53%, transparent 53%),
+    rgba(74, 231, 161, .1);
+}
+
+.range-selected.range-preview-melee {
+  box-shadow:
+    inset 0 0 0 999px rgba(255, 145, 120, .2),
+    inset 0 0 0 2px rgba(255, 178, 156, .88),
+    0 0 13px rgba(255,145,120,.3);
+}
+
+.range-selected.range-preview-melee::after {
+  border-color: rgba(255, 178, 156, .7);
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(255,178,156,.58) 47% 53%, transparent 53%),
+    linear-gradient(transparent 47%, rgba(255,178,156,.58) 47% 53%, transparent 53%),
+    rgba(255, 145, 120, .1);
 }
 
 .range-origin {
@@ -376,6 +426,14 @@ button:focus-visible {
 .cell-selected {
   z-index: 3;
   box-shadow: inset 0 0 0 2px #fff, 0 0 18px rgba(255,255,255,.16);
+}
+
+.cell-selected.range-origin {
+  z-index: 4;
+  box-shadow:
+    inset 0 0 0 999px rgba(255,255,255,.12),
+    inset 0 0 0 3px #fff,
+    0 0 30px rgba(255,255,255,.36);
 }
 
 .deployed-unit {
@@ -483,23 +541,30 @@ button:focus-visible {
 .effect-layer { z-index: 7; }
 
 .effect-line {
-  stroke-width: .045;
+  stroke-width: 2;
   vector-effect: non-scaling-stroke;
   stroke: #fff;
   filter: drop-shadow(0 0 3px #fff);
 }
 
 .effect-shot .effect-line {
-  stroke: #bfe2ff;
-  stroke-width: .08;
-  stroke-dasharray: .2 .12;
-  filter: drop-shadow(0 0 4px #72a7ff) drop-shadow(0 0 9px rgba(114,167,255,.9));
-  animation: shot-tracer .22s ease-out both;
+  stroke: #f8fcff;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 11px rgba(114,167,255,1));
+  animation: shot-tracer .34s ease-out both;
+}
+
+.effect-shot .effect-line-bloom {
+  stroke: rgba(114, 210, 255, .78);
+  stroke-width: 11;
+  filter: drop-shadow(0 0 8px #72d2ff) drop-shadow(0 0 18px rgba(114,167,255,1));
+  opacity: .9;
 }
 
 .effect-arts .effect-line {
   stroke: var(--yellow);
-  stroke-width: .07;
+  stroke-width: 3;
 }
 
 .effect-heal .effect-line {
@@ -512,11 +577,27 @@ button:focus-visible {
 .effect-hit {
   fill: transparent;
   stroke: currentColor;
-  stroke-width: .05;
+  stroke-width: 3;
   vector-effect: non-scaling-stroke;
   transform-box: fill-box;
   transform-origin: center;
-  animation: effect-hit .22s ease-out both;
+  animation: effect-hit .34s ease-out both;
+}
+
+.effect-hit-bloom {
+  stroke-width: 7;
+  opacity: .8;
+}
+
+.effect-muzzle {
+  fill: #fff;
+  stroke: #72d2ff;
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px #72a7ff);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: effect-muzzle .34s ease-out both;
 }
 
 .effect-shot { color: #bfe2ff; }
@@ -524,13 +605,17 @@ button:focus-visible {
 
 @keyframes shot-tracer {
   from {
-    stroke-dashoffset: .36;
-    opacity: .2;
-  }
-  35% { opacity: 1; }
-  to {
-    stroke-dashoffset: 0;
     opacity: 0;
+    stroke-dasharray: 0 2;
+  }
+  18% {
+    opacity: 1;
+    stroke-dasharray: 2 0;
+  }
+  55% { opacity: 1; }
+  to {
+    opacity: 0;
+    stroke-dasharray: 2 0;
   }
 }
 
@@ -542,6 +627,17 @@ button:focus-visible {
   to {
     opacity: 0;
     transform: scale(1.8);
+  }
+}
+
+@keyframes effect-muzzle {
+  from {
+    opacity: 1;
+    transform: scale(.45);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
   }
 }
 

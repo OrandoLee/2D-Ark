@@ -9,6 +9,7 @@ interface GridCellProps {
   isInPreviewRange: boolean
   isPreviewOrigin: boolean
   previewType?: UnitType
+  rangeSource?: 'placement' | 'selected'
   isDragging: boolean
   isDragOver: boolean
   isSelected: boolean
@@ -24,6 +25,7 @@ export function GridCell({
   isInPreviewRange,
   isPreviewOrigin,
   previewType,
+  rangeSource,
   isDragging,
   isDragOver,
   isSelected,
@@ -51,6 +53,7 @@ export function GridCell({
         isLegal === false ? 'deploy-illegal' : '',
         isInPreviewRange ? 'range-preview' : '',
         isInPreviewRange && previewType ? `range-preview-${previewType}` : '',
+        isInPreviewRange && rangeSource ? `range-${rangeSource}` : '',
         isPreviewOrigin ? 'range-origin' : '',
         isDragging ? 'drag-active' : '',
         isDragOver ? 'drop-target' : '',

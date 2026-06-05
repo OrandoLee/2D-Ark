@@ -50,8 +50,9 @@ function addEffect(
   fromY: number,
   toX: number,
   toY: number,
+  ttl = 0.22,
 ) {
-  effects.push({ id, type, fromX, fromY, toX, toY, ttl: 0.22 })
+  effects.push({ id, type, fromX, fromY, toX, toY, ttl })
 }
 
 export function useGameState() {
@@ -222,6 +223,7 @@ export function useGameState() {
               unit.row,
               target.x,
               target.y,
+              definition.type === 'ranged' && definition.damageType !== 'arts' ? 0.34 : 0.22,
             )
           }
         }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { MAP_CELLS, MAP_COLS, MAP_ROWS } from '../data/map'
 import { UNIT_DEFINITIONS } from '../data/units'
 import type { GameState } from '../types/game'
-import { manhattanDistance } from '../utils/range'
+import { getFacingCell, manhattanDistance } from '../utils/range'
 import { GridCell } from './GridCell'
 
 interface GameBoardProps {
@@ -16,6 +16,12 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
   const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number }>()
   const selectedDefinition = state.selectedUnitId
     ? UNIT_DEFINITIONS[state.selectedUnitId]
+    : undefined
+  const selectedDeployedUnit = state.deployedUnits.find(
+    (unit) => unit.instanceId === state.selectedDeployedId,
+  )
+  const selectedDeployedDefinition = selectedDeployedUnit
+    ? UNIT_DEFINITIONS[selectedDeployedUnit.definitionId]
     : undefined
   const previewCell = dragOverCell ?? hoveredCell
   const previewOrigin =
@@ -32,6 +38,18 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
             ),
         )
       : undefined
+  const rangeOrigin = previewOrigin ?? selectedDeployedUnit
+  const rangeDefinition = previewOrigin ? selectedDefinition : selectedDeployedDefinition
+  const rangeSource = previewOrigin ? 'placement' : selectedDeployedUnit ? 'selected' : undefined
+
+  const isCellInRange = (cell: { row: number; col: number }) => {
+    if (!rangeOrigin || !rangeDefinition) return false
+    if (rangeDefinition.type === 'melee') {
+      const facing = getFacingCell(rangeOrigin, selectedDeployedUnit?.direction ?? 'right')
+      return cell.row === facing.row && cell.col === facing.col
+    }
+    return manhattanDistance(cell, rangeOrigin) <= rangeDefinition.range
+  }
 
   return (
     <div className="board-frame">
@@ -54,9 +72,7 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
           const isLegal = selectedDefinition
             ? cell.deployableTypes.includes(selectedDefinition.type) && !unit
             : undefined
-          const isInPreviewRange =
-            Boolean(previewOrigin && selectedDefinition) &&
-            manhattanDistance(cell, previewOrigin!) <= selectedDefinition!.range
+          const isInPreviewRange = isCellInRange(cell)
           return (
             <GridCell
               key={`${cell.row}-${cell.col}`}
@@ -64,8 +80,9 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
               unit={unit}
               isLegal={isLegal}
               isInPreviewRange={isInPreviewRange}
-              isPreviewOrigin={previewOrigin?.row === cell.row && previewOrigin.col === cell.col}
-              previewType={previewOrigin ? selectedDefinition?.type : undefined}
+              isPreviewOrigin={rangeOrigin?.row === cell.row && rangeOrigin.col === cell.col}
+              previewType={rangeDefinition?.type}
+              rangeSource={rangeSource}
               isDragging={isDraggingUnit}
               isDragOver={dragOverCell?.row === cell.row && dragOverCell?.col === cell.col}
               isSelected={unit?.instanceId === state.selectedDeployedId}
@@ -112,6 +129,15 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
         >
           {state.effects.map((effect) => (
             <g key={effect.id} className={`effect effect-${effect.type}`}>
+              {effect.type === 'shot' && (
+                <line
+                  className="effect-line effect-line-bloom"
+                  x1={effect.fromX + 0.5}
+                  y1={effect.fromY + 0.5}
+                  x2={effect.toX + 0.5}
+                  y2={effect.toY + 0.5}
+                />
+              )}
               <line
                 className="effect-line"
                 x1={effect.fromX + 0.5}
@@ -119,13 +145,29 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
                 x2={effect.toX + 0.5}
                 y2={effect.toY + 0.5}
               />
-              {(effect.type === 'shot' || effect.type === 'arts') && (
+              {effect.type === 'shot' && (
                 <circle
-                  className="effect-hit"
-                  cx={effect.toX + 0.5}
-                  cy={effect.toY + 0.5}
-                  r="0.16"
+                  className="effect-muzzle"
+                  cx={effect.fromX + 0.5}
+                  cy={effect.fromY + 0.5}
+                  r="0.2"
                 />
+              )}
+              {(effect.type === 'shot' || effect.type === 'arts') && (
+                <>
+                  <circle
+                    className="effect-hit effect-hit-bloom"
+                    cx={effect.toX + 0.5}
+                    cy={effect.toY + 0.5}
+                    r="0.26"
+                  />
+                  <circle
+                    className="effect-hit"
+                    cx={effect.toX + 0.5}
+                    cy={effect.toY + 0.5}
+                    r="0.16"
+                  />
+                </>
               )}
             </g>
           ))}
