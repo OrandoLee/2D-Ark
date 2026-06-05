@@ -28,24 +28,24 @@ export function LevelImportExportPanel({
   return (
     <section className="editor-panel import-export-panel">
       <div className="editor-panel-heading">
-        <span>Import / Export</span>
+        <span>导入 / 导出</span>
         <strong>v{level.version}</strong>
       </div>
       <div className="editor-button-row">
-        <button onClick={onExportJson}>Export JSON</button>
-        <button onClick={onExportTypeScript}>Export TS</button>
-        <button onClick={onCopy}>Copy JSON</button>
+        <button onClick={onExportJson}>导出 JSON</button>
+        <button onClick={onExportTypeScript}>导出 TS</button>
+        <button onClick={onCopy}>复制 JSON</button>
         <button disabled={!validation.valid} onClick={onDownload}>
-          Download JSON
+          下载 JSON
         </button>
       </div>
-      <textarea readOnly value={exportText} placeholder="Exported JSON appears here." />
+      <textarea readOnly value={exportText} placeholder="导出的 JSON 会显示在这里。" />
       <textarea
         value={importText}
-        placeholder="Paste LevelDefinition JSON here."
+        placeholder="在这里粘贴 LevelDefinition JSON。"
         onChange={(event) => onImportTextChange(event.target.value)}
       />
-      <button onClick={onImport}>Import JSON</button>
+      <button onClick={onImport}>导入 JSON</button>
     </section>
   )
 }

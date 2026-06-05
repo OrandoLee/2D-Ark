@@ -12,34 +12,34 @@ export function StartScreen({ onStart, onOpenEditor }: StartScreenProps) {
         ))}
       </div>
       <div className="start-content">
-        <span className="start-index">Experiment / 001</span>
+        <span className="start-index">实验编号 / 001</span>
         <div className="title-lockup">
-          <span>DELEE LAB PRESENTS</span>
+          <span>DELEE LAB 呈现</span>
           <h1>
             GRID DEFENSE
             <b>LAB-01</b>
           </h1>
         </div>
         <div className="briefing">
-          <span>Directive</span>
-          <p>Deploy tactical modules, resist hostile waves, and keep the core intact.</p>
+          <span>行动指令</span>
+          <p>部署作战模块，抵御敌人波次，保持核心完整。</p>
         </div>
         <div className="start-actions">
           <button className="start-button" onClick={onStart}>
-            <span>Start Operation</span>
+            <span>开始行动</span>
             <b>-&gt;</b>
           </button>
           {onOpenEditor && (
             <button className="start-button start-button-secondary" onClick={onOpenEditor}>
-              <span>Level Editor</span>
+              <span>关卡编辑器</span>
               <b>-&gt;</b>
             </button>
           )}
         </div>
         <div className="start-footer">
-          <span>Version / 01.26</span>
-          <span>Status / Ready</span>
-          <span>Frontend simulation only</span>
+          <span>版本 / 01.26</span>
+          <span>状态 / 就绪</span>
+          <span>纯前端模拟运行</span>
         </div>
       </div>
     </main>

@@ -33,11 +33,11 @@ const classNames = {
 }
 
 const rarityNames = {
-  common: 'COMMON',
-  uncommon: 'UNCOMMON',
-  rare: 'RARE',
-  epic: 'EPIC',
-  prototype: 'PROTOTYPE',
+  common: '普通',
+  uncommon: '优秀',
+  rare: '稀有',
+  epic: '史诗',
+  prototype: '原型',
 }
 
 export function UnitCard({

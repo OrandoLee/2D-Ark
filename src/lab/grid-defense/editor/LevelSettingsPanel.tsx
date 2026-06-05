@@ -9,6 +9,19 @@ interface LevelSettingsPanelProps {
 
 const difficulties = ['easy', 'normal', 'hard', 'extreme'] as const
 const rarityKeys = ['common', 'uncommon', 'rare', 'epic', 'prototype'] as const
+const difficultyNames = {
+  easy: '简单',
+  normal: '普通',
+  hard: '困难',
+  extreme: '极限',
+}
+const rarityNames = {
+  common: '普通权重',
+  uncommon: '优秀权重',
+  rare: '稀有权重',
+  epic: '史诗权重',
+  prototype: '原型权重',
+}
 
 export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsPanelProps) {
   const update = <K extends keyof LevelDefinition>(key: K, value: LevelDefinition[K]) => {
@@ -26,38 +39,38 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
   return (
     <section className="editor-panel">
       <div className="editor-panel-heading">
-        <span>Level Settings</span>
-        <strong>{level.difficulty}</strong>
+        <span>关卡设置</span>
+        <strong>{difficultyNames[level.difficulty]}</strong>
       </div>
       <div className="form-grid">
         <label>
-          Level ID
+          关卡 ID
           <input value={level.id} onChange={(event) => update('id', event.target.value)} />
         </label>
         <label>
-          Name
+          关卡名
           <input value={level.name} onChange={(event) => update('name', event.target.value)} />
         </label>
         <label className="wide">
-          Description
+          描述
           <textarea value={level.description} onChange={(event) => update('description', event.target.value)} />
         </label>
         <label>
-          Author
+          作者
           <input value={level.author} onChange={(event) => update('author', event.target.value)} />
         </label>
         <label>
-          Difficulty
+          难度
           <select value={level.difficulty} onChange={(event) => update('difficulty', event.target.value as LevelDefinition['difficulty'])}>
             {difficulties.map((difficulty) => (
               <option key={difficulty} value={difficulty}>
-                {difficulty}
+                {difficultyNames[difficulty]}
               </option>
             ))}
           </select>
         </label>
         <label>
-          Rows
+          行数
           <input
             type="number"
             min={MIN_ROWS}
@@ -67,7 +80,7 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
           />
         </label>
         <label>
-          Cols
+          列数
           <input
             type="number"
             min={MIN_COLS}
@@ -77,15 +90,15 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
           />
         </label>
         <label>
-          Initial Life
+          初始生命
           <input type="number" value={level.initialLife} onChange={(event) => update('initialLife', Number(event.target.value))} />
         </label>
         <label>
-          Initial DP
+          初始 DP
           <input type="number" value={level.initialDp} onChange={(event) => update('initialDp', Number(event.target.value))} />
         </label>
         <label>
-          DP Regen / sec
+          DP 回复 / 秒
           <input
             type="number"
             step="0.1"
@@ -94,11 +107,11 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
           />
         </label>
         <label>
-          Deploy Limit
+          部署上限
           <input type="number" value={level.deployLimit} onChange={(event) => update('deployLimit', Number(event.target.value))} />
         </label>
         <label>
-          Hand Size
+          初始手牌数
           <input
             type="number"
             min={1}
@@ -108,7 +121,7 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
           />
         </label>
         <label>
-          Slot Refresh (ms)
+          槽位刷新时间（毫秒）
           <input
             type="number"
             value={level.handConfig.slotRefreshMs}
@@ -117,7 +130,7 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
         </label>
         {rarityKeys.map((rarity) => (
           <label key={rarity}>
-            {rarity}
+            {rarityNames[rarity]}
             <input
               type="number"
               value={level.handConfig.rarityWeights[rarity]}
@@ -131,7 +144,7 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
           </label>
         ))}
         <label className="wide">
-          Allowed Classes
+          允许职业
           <input
             value={level.handConfig.allowedClasses?.join(',') ?? ''}
             onChange={(event) =>
@@ -146,7 +159,7 @@ export function LevelSettingsPanel({ level, onChange, onResize }: LevelSettingsP
           />
         </label>
         <label className="wide">
-          Banned Operators
+          禁用单位
           <input
             value={level.handConfig.bannedOperatorIds?.join(',') ?? ''}
             onChange={(event) =>

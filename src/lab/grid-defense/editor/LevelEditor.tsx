@@ -58,16 +58,16 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
   })
   const [exportText, setExportText] = useState('')
   const [importText, setImportText] = useState('')
-  const [message, setMessage] = useState('Editor ready.')
+  const [message, setMessage] = useState('编辑器已就绪。')
   const [isPlaytesting, setIsPlaytesting] = useState(false)
   const validation = useMemo(() => validateLevel(level), [level])
 
   const refreshSavedLevels = () => {
     try {
       setSavedLevels(loadSavedLevels())
-      setMessage('Saved levels refreshed.')
+      setMessage('本地关卡列表已刷新。')
     } catch (error) {
-      setMessage(`Storage error: ${String(error)}`)
+      setMessage(`本地存储错误：${String(error)}`)
     }
   }
 
@@ -78,7 +78,7 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
   const addPath = () => {
     const path: EnemyPath = {
       id: createId('path'),
-      name: `Path ${level.paths.length + 1}`,
+      name: `路径 ${level.paths.length + 1}`,
       spawnCell: { row: 0, col: 0 },
       baseCell: { row: 0, col: 0 },
       points: [],
@@ -115,7 +115,7 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
     const cell = level.grid[row]?.[col]
     if (!cell) return
     if (cell.type === 'yellow' || cell.type === 'red') {
-      setMessage('Path cannot cross yellow or red cells.')
+      setMessage('路径不能穿过高台格或禁用格。')
       return
     }
 
@@ -124,7 +124,7 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
     if (!pathId || !paths.some((path) => path.id === pathId)) {
       const newPath: EnemyPath = {
         id: createId('path'),
-        name: `Path ${paths.length + 1}`,
+        name: `路径 ${paths.length + 1}`,
         spawnCell: { row: 0, col: 0 },
         baseCell: { row: 0, col: 0 },
         points: [],
@@ -139,22 +139,22 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
     const point = { row, col }
     if (path.points.some((existing) => samePoint(existing, point))) return
     if (path.points.length === 0 && cell.type !== 'spawn') {
-      setMessage('First path point must be a spawn cell.')
+      setMessage('路径第一个点必须是入口格。')
       return
     }
     const last = path.points[path.points.length - 1]
     if (last && level.grid[last.row]?.[last.col]?.type === 'base') {
-      setMessage('This path already reaches a base. Clear or undo before extending.')
+      setMessage('这条路径已经到达核心。继续延伸前请先清空或撤销。')
       return
     }
     if (last && !adjacent(last, point)) {
-      setMessage('Path steps must be adjacent. Diagonal jumps are blocked.')
+      setMessage('路径点必须上下左右相邻，不能斜向跳跃。')
       return
     }
 
     const nextPath = recalcPathEnds({ ...path, points: [...path.points, point] })
     commitLevel({ ...level, paths: paths.map((item) => (item.id === pathId ? nextPath : item)) })
-    setMessage(cell.type === 'base' ? 'Path reached base.' : 'Path point added.')
+    setMessage(cell.type === 'base' ? '路径已到达核心。' : '路径点已添加。')
   }
 
   const paintCell = (row: number, col: number) => {
@@ -171,12 +171,12 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
 
   const resize = (rows: number, cols: number) => {
     if (rows === level.rows && cols === level.cols) return
-    if (!window.confirm('Resize the map? Cells outside the new size will be trimmed.')) return
+    if (!window.confirm('确认修改地图尺寸？超出新尺寸的格子会被裁切。')) return
     commitLevel(resizeLevelGrid(level, rows, cols))
   }
 
   const exportJson = () => {
-    if (!validation.valid) setMessage('Level has errors. JSON export is shown for repair or forced copy.')
+    if (!validation.valid) setMessage('当前关卡存在错误。JSON 已显示，可用于修复或强制复制。')
     setExportText(exportLevelJson(level))
   }
 
@@ -187,11 +187,11 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
   const copyJson = async () => {
     const text = exportText || exportLevelJson(level)
     await navigator.clipboard.writeText(text)
-    setMessage('JSON copied to clipboard.')
+    setMessage('JSON 已复制到剪贴板。')
   }
 
   const downloadJson = () => {
-    if (!validation.valid && !window.confirm('This level has errors. Download anyway?')) return
+    if (!validation.valid && !window.confirm('当前关卡存在错误，仍要下载吗？')) return
     const blob = new Blob([exportLevelJson(level)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
@@ -206,21 +206,21 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
       const imported = importLevelJson(importText)
       setLevel(imported)
       setActivePathId(imported.paths[0]?.id)
-      setMessage('Level imported.')
+      setMessage('关卡已导入。')
     } catch (error) {
-      setMessage(`Import failed: ${String(error)}`)
+      setMessage(`导入失败：${String(error)}`)
     }
   }
 
   const saveCurrentLevel = () => {
     try {
-      if (savedLevels.some((item) => item.id === level.id) && !window.confirm('Overwrite saved level?')) return
+      if (savedLevels.some((item) => item.id === level.id) && !window.confirm('确认覆盖已保存的关卡？')) return
       const saved = saveLevel(level)
       setLevel(saved)
       refreshSavedLevels()
-      setMessage('Level saved to localStorage.')
+      setMessage('关卡已保存到本地。')
     } catch (error) {
-      setMessage(`Storage error: ${String(error)}`)
+      setMessage(`本地存储错误：${String(error)}`)
     }
   }
 
@@ -229,20 +229,20 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
       const saved = saveLevel({
         ...level,
         id: createId('level'),
-        name: `${level.name} Copy`,
+        name: `${level.name} 副本`,
         createdAt: new Date().toISOString(),
       })
       setLevel(saved)
       refreshSavedLevels()
-      setMessage('Level saved as a new local copy.')
+      setMessage('关卡已另存为新的本地副本。')
     } catch (error) {
-      setMessage(`Storage error: ${String(error)}`)
+      setMessage(`本地存储错误：${String(error)}`)
     }
   }
 
   const playtest = () => {
     if (!validation.valid) {
-      setMessage('Fix validation errors before playtest.')
+      setMessage('请先修复合法性错误，再进入试玩。')
       return
     }
     setIsPlaytesting(true)
@@ -267,7 +267,7 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
           const next = createNewLevel()
           setLevel(next)
           setActivePathId(next.paths[0]?.id)
-          setMessage('New level created.')
+          setMessage('新关卡已创建。')
         }}
         onSave={saveCurrentLevel}
         onSaveAsNew={saveAsNewLevel}
@@ -313,7 +313,7 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
               })
             }
             onDeletePath={(pathId) => {
-              if (!window.confirm('Delete this path?')) return
+              if (!window.confirm('确认删除这条路径？')) return
               const paths = level.paths.filter((path) => path.id !== pathId)
               commitLevel({ ...level, paths })
               setActivePathId(paths[0]?.id)
@@ -339,23 +339,23 @@ export function LevelEditor({ onBackToGame }: LevelEditorProps) {
             onLoad={(saved) => {
               setLevel(saved)
               setActivePathId(saved.paths[0]?.id)
-              setMessage('Saved level loaded.')
+              setMessage('本地关卡已读取。')
             }}
             onDuplicate={(saved) => {
               const duplicate = {
                 ...saved,
                 id: createId('level'),
-                name: `${saved.name} Copy`,
+                name: `${saved.name} 副本`,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               }
               const stored = saveLevel(duplicate)
               setLevel(stored)
               refreshSavedLevels()
-              setMessage('Saved level duplicated.')
+              setMessage('本地关卡已复制。')
             }}
             onDelete={(levelId) => {
-              if (!window.confirm('Delete this saved level?')) return
+              if (!window.confirm('确认删除这个本地关卡？')) return
               deleteSavedLevel(levelId)
               refreshSavedLevels()
             }}

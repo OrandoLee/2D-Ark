@@ -22,17 +22,17 @@ export function EditorToolbar({
   return (
     <div className="editor-toolbar">
       <div>
-        <span className="eyebrow">DELEE LAB / Level Production</span>
-        <h1>Level Editor</h1>
+        <span className="eyebrow">DELEE LAB / 关卡生产</span>
+        <h1>关卡编辑器</h1>
       </div>
       <div className="editor-toolbar-actions">
-        <button onClick={onBackToGame}>Back to Game</button>
-        <button onClick={onNewLevel}>New Level</button>
-        <button onClick={onSave}>Save</button>
-        <button onClick={onSaveAsNew}>Save As New</button>
-        <button onClick={onExport}>Export</button>
+        <button onClick={onBackToGame}>返回游戏</button>
+        <button onClick={onNewLevel}>新建关卡</button>
+        <button onClick={onSave}>保存</button>
+        <button onClick={onSaveAsNew}>另存为新关卡</button>
+        <button onClick={onExport}>导出</button>
         <button className="primary" disabled={!validation.valid} onClick={onPlaytest}>
-          Playtest
+          试玩
         </button>
       </div>
     </div>

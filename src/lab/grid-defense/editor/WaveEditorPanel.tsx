@@ -20,7 +20,7 @@ export function WaveEditorPanel({ level, onChange }: WaveEditorPanelProps) {
       ...level.waves,
       {
         id: createId('wave'),
-        name: `Wave ${level.waves.length + 1}`,
+        name: `第 ${level.waves.length + 1} 波`,
         delayAfterPreviousWave: level.waves.length === 0 ? 0 : 3000,
         enemies: [],
       },
@@ -51,8 +51,8 @@ export function WaveEditorPanel({ level, onChange }: WaveEditorPanelProps) {
   return (
     <section className="editor-panel">
       <div className="editor-panel-heading">
-        <span>Wave Editor</span>
-        <button onClick={addWave}>Add Wave</button>
+        <span>波次编辑</span>
+        <button onClick={addWave}>新增波次</button>
       </div>
       <div className="wave-list">
         {level.waves.map((wave) => (
@@ -60,14 +60,14 @@ export function WaveEditorPanel({ level, onChange }: WaveEditorPanelProps) {
             <div className="wave-card-top">
               <input value={wave.name} onChange={(event) => updateWave(wave.id, { name: event.target.value })} />
               <label>
-                Delay ms
+                等待时间（毫秒）
                 <input
                   type="number"
                   value={wave.delayAfterPreviousWave}
                   onChange={(event) => updateWave(wave.id, { delayAfterPreviousWave: Number(event.target.value) })}
                 />
               </label>
-              <button onClick={() => addEnemy(wave.id)}>Add Enemy</button>
+              <button onClick={() => addEnemy(wave.id)}>新增敌人组</button>
               <button
                 onClick={() =>
                   updateWaves([
@@ -75,22 +75,22 @@ export function WaveEditorPanel({ level, onChange }: WaveEditorPanelProps) {
                     {
                       ...wave,
                       id: createId('wave'),
-                      name: `${wave.name} Copy`,
+                      name: `${wave.name} 副本`,
                       enemies: wave.enemies.map((enemy) => ({ ...enemy, id: createId('enemy') })),
                     },
                   ])
                 }
               >
-                Copy
+                复制
               </button>
-              <button onClick={() => updateWaves(level.waves.filter((item) => item.id !== wave.id))}>Delete</button>
+              <button onClick={() => updateWaves(level.waves.filter((item) => item.id !== wave.id))}>删除</button>
             </div>
             <div className="enemy-row enemy-row-head">
-              <span>Type</span>
-              <span>Delay</span>
-              <span>Count</span>
-              <span>Interval</span>
-              <span>Path</span>
+              <span>类型</span>
+              <span>延迟</span>
+              <span>数量</span>
+              <span>间隔</span>
+              <span>路径</span>
               <span />
               <span />
             </div>

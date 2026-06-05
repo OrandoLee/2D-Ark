@@ -49,7 +49,7 @@ function createInitialState(level: LevelDefinition, phase: GamePhase = 'start'):
     speedMultiplier: 1,
     isPaused: false,
     effects: [],
-    message: phase === 'playing' ? 'Tactical prep: contacts in 4 seconds.' : undefined,
+    message: phase === 'playing' ? '战术准备：4 秒后敌人出现' : undefined,
     elapsedTime: 0,
     deployCount: 0,
     waveElapsed: -4,
@@ -404,7 +404,7 @@ export function useGameState(level: LevelDefinition = defaultLevel, initialPhase
               next.waveElapsed = 0
               next.waveSpawnIndex = 0
               next.intermission = 0
-              next.message = `Wave ${String(next.currentWave + 1).padStart(2, '0')} active.`
+              next.message = `第 ${String(next.currentWave + 1).padStart(2, '0')} 波已启动`
             }
           }
         } else {
@@ -441,10 +441,10 @@ export function useGameState(level: LevelDefinition = defaultLevel, initialPhase
       const definition = UNIT_DEFINITIONS[unitId]
       if (!definition || !isUnitInHand(current, unitId)) return current
       if (current.deployedUnits.length >= current.level.deployLimit) {
-        return { ...current, message: 'Deploy limit reached.' }
+        return { ...current, message: '已达到部署上限' }
       }
       if (current.dp < definition.cost) {
-        return { ...current, message: 'Insufficient DP.' }
+        return { ...current, message: 'DP 不足' }
       }
       return {
         ...current,
@@ -462,17 +462,17 @@ export function useGameState(level: LevelDefinition = defaultLevel, initialPhase
       const definition = UNIT_DEFINITIONS[unitId]
       if (!definition || !isUnitInHand(current, unitId)) return current
       if (current.deployedUnits.length >= current.level.deployLimit) {
-        return { ...current, message: 'Deploy limit reached.' }
+        return { ...current, message: '已达到部署上限' }
       }
       if (current.dp < definition.cost) {
-        return { ...current, message: 'Insufficient DP.' }
+        return { ...current, message: 'DP 不足' }
       }
       return {
         ...current,
         selectedUnitId: unitId,
         selectedDeployedId: undefined,
         pendingDirectionCell: undefined,
-        message: 'Drag to a highlighted cell.',
+        message: '拖拽到高亮格子完成部署',
       }
     })
   }
@@ -480,19 +480,19 @@ export function useGameState(level: LevelDefinition = defaultLevel, initialPhase
   const validateDeployment = (current: GameState, unitId: UnitId, row: number, col: number) => {
     const definition = UNIT_DEFINITIONS[unitId]
     const cell = getCell(current, row, col)
-    if (!definition || !isUnitInHand(current, unitId)) return 'Module is refreshing.'
+    if (!definition || !isUnitInHand(current, unitId)) return '模块正在刷新'
     if (
       !cell ||
       !cell.deployableTypes.includes(definition.type) ||
       !definition.deployOn.includes(cell.type)
     ) {
-      return 'This module cannot deploy on that cell.'
+      return '该格无法部署此模块'
     }
     if (current.deployedUnits.some((unit) => unit.row === row && unit.col === col)) {
-      return 'Cell already occupied.'
+      return '该格已有模块'
     }
-    if (current.dp < definition.cost) return 'Insufficient DP.'
-    if (current.deployedUnits.length >= current.level.deployLimit) return 'Deploy limit reached.'
+    if (current.dp < definition.cost) return 'DP 不足'
+    if (current.deployedUnits.length >= current.level.deployLimit) return '已达到部署上限'
     return undefined
   }
 
@@ -523,7 +523,7 @@ export function useGameState(level: LevelDefinition = defaultLevel, initialPhase
       selectedUnitId: undefined,
       selectedDeployedId: unit.instanceId,
       pendingDirectionCell: undefined,
-      message: `${definition.name} deployed.`,
+      message: `${definition.name} 已部署`,
     }
     applyDeploymentTrait(next, unit)
     return next
@@ -540,7 +540,7 @@ export function useGameState(level: LevelDefinition = defaultLevel, initialPhase
           return {
             ...current,
             pendingDirectionCell: { row, col, unitId: current.selectedUnitId },
-            message: 'Choose module facing.',
+            message: '请选择模块朝向',
           }
         }
         return deploy(current, current.selectedUnitId, row, col)
@@ -588,7 +588,7 @@ export function useGameState(level: LevelDefinition = defaultLevel, initialPhase
             : enemy,
         ),
         selectedDeployedId: undefined,
-        message: `Module retreated. +${refund} DP`,
+        message: `模块已撤回 / +${refund} DP`,
       }
     })
   }

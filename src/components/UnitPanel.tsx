@@ -31,7 +31,7 @@ export function UnitPanel({
     <div className="unit-panel">
       <div className="panel-heading">
         <span className="eyebrow">作战模块库</span>
-        <span>拖拽模块至格子 → 移动鼠标设定朝向</span>
+        <span>拖拽模块至格子，近战模块需设定朝向</span>
       </div>
       <div className="unit-card-row">
         {currentHand.map((slot) => {

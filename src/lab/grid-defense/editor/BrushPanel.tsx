@@ -6,11 +6,13 @@ interface BrushPanelProps {
 }
 
 export function BrushPanel({ activeBrush, onBrushChange }: BrushPanelProps) {
+  const activeBrushLabel = BRUSHES.find((brush) => brush.id === activeBrush)?.label ?? activeBrush
+
   return (
     <section className="editor-panel brush-panel">
       <div className="editor-panel-heading">
-        <span>Brush</span>
-        <strong>{activeBrush}</strong>
+        <span>画笔</span>
+        <strong>{activeBrushLabel}</strong>
       </div>
       <div className="brush-grid">
         {BRUSHES.map((brush) => (

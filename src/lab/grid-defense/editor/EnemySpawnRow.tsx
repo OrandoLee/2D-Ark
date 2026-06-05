@@ -1,3 +1,4 @@
+import { ENEMY_DEFINITIONS } from '../../../data/enemies'
 import type { EnemyId } from '../../../types/game'
 import type { LevelDefinition, WaveEnemy } from '../../../types/level'
 
@@ -23,25 +24,25 @@ export function EnemySpawnRow({
       <select value={enemy.enemyType} onChange={(event) => onChange({ ...enemy, enemyType: event.target.value as EnemyId })}>
         {enemyTypes.map((enemyType) => (
           <option key={enemyType} value={enemyType}>
-            {enemyType}
+            {ENEMY_DEFINITIONS[enemyType].name} / {enemyType}
           </option>
         ))}
       </select>
       <input
         type="number"
-        title="delay ms"
+        title="延迟毫秒"
         value={enemy.delay}
         onChange={(event) => onChange({ ...enemy, delay: Number(event.target.value) })}
       />
       <input
         type="number"
-        title="count"
+        title="数量"
         value={enemy.count}
         onChange={(event) => onChange({ ...enemy, count: Number(event.target.value) })}
       />
       <input
         type="number"
-        title="interval ms"
+        title="间隔毫秒"
         value={enemy.interval}
         onChange={(event) => onChange({ ...enemy, interval: Number(event.target.value) })}
       />
@@ -52,8 +53,8 @@ export function EnemySpawnRow({
           </option>
         ))}
       </select>
-      <button onClick={onDuplicate}>Copy</button>
-      <button onClick={onDelete}>Delete</button>
+      <button onClick={onDuplicate}>复制</button>
+      <button onClick={onDelete}>删除</button>
     </div>
   )
 }

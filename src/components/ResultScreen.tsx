@@ -18,43 +18,43 @@ export function ResultScreen({ state, onRestart, onExitPlaytest }: ResultScreenP
   return (
     <main className={`result-screen result-${state.phase}`}>
       <div className="result-panel">
-        <span className="eyebrow">DELEE LAB / Operation Report</span>
-        <h1>{state.phase === 'victory' ? 'Operation Complete' : 'Operation Failed'}</h1>
+        <span className="eyebrow">DELEE LAB / 行动报告</span>
+        <h1>{state.phase === 'victory' ? '行动完成' : '行动失败'}</h1>
         <p>
           {state.phase === 'victory'
-            ? 'All hostile signals were cleared and the core remained intact.'
-            : 'Core integrity reached zero. The simulation has stopped.'}
+            ? '所有敌对信号均已清除，核心保持完整。'
+            : '核心完整度归零，模拟行动已终止。'}
         </p>
         <div className="result-stats">
           <div>
-            <span>Life</span>
+            <span>剩余生命</span>
             <strong>{state.life}</strong>
           </div>
           <div>
-            <span>Kills</span>
+            <span>击杀数</span>
             <strong>{state.kills}</strong>
           </div>
           <div>
-            <span>Deploys</span>
+            <span>部署次数</span>
             <strong>{state.deployCount}</strong>
           </div>
           <div>
-            <span>Time</span>
+            <span>行动用时</span>
             <strong>{time}</strong>
           </div>
         </div>
         <div className="rating">
-          <span>Rating</span>
+          <span>评级</span>
           <strong>{rating}</strong>
         </div>
         <div className="result-actions">
           <button className="start-button" onClick={onRestart}>
-            <span>Restart</span>
+            <span>重新开始</span>
             <b>-&gt;</b>
           </button>
           {onExitPlaytest && (
             <button className="start-button start-button-secondary" onClick={onExitPlaytest}>
-              <span>Back to Editor</span>
+              <span>返回编辑器</span>
               <b>-&gt;</b>
             </button>
           )}

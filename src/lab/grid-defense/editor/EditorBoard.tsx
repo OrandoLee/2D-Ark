@@ -31,7 +31,7 @@ export function EditorBoard({ level, activePathId, onPaintCell }: EditorBoardPro
         <span>
           {level.cols} x {level.rows}
         </span>
-        <span>hover cells for row / col</span>
+        <span>悬停格子查看行列坐标</span>
       </div>
       <div className="editor-board-scroll">
         <div

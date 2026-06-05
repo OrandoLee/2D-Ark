@@ -59,24 +59,24 @@ npm run lint
 - `src/components/`：独立的游戏界面与棋盘组件。
 - `src/utils/`：伤害、路径插值与范围计算工具。
 
-## Level Editor
+## 关卡编辑器
 
 关卡编辑器入口：
 
 - 本地开发或支持 history fallback 的部署环境：`/lab/grid-defense/editor`。
-- 游戏开始页也提供 `Level Editor` 按钮，可在游戏模式和编辑器模式之间切换。
+- 游戏开始页也提供 `关卡编辑器` 按钮，可在游戏模式和编辑器模式之间切换。
 
 编辑器提供完整的本地关卡生产流程：
 
-1. 点击 `New Level` 创建默认 12 列 × 8 行关卡。
-2. 使用 `Blue`、`Yellow`、`Red`、`Spawn`、`Base` 画笔点击或拖拽格子，编辑地图。
-3. 点击 `Add Path`，选择 `Path` 画笔，从 `spawn` 开始，沿相邻 blue 格绘制，最后点到 `base`。
-4. 在 `Level Settings` 中设置名称、描述、难度、初始 Life、初始 DP、DP 回复、部署上限、手牌数量、槽位刷新时间和稀有度权重。
-5. 在 `Wave Editor` 中添加 wave 和 enemy group，配置 `enemyType`、`delay`、`count`、`interval`、`pathId`。
-6. `Validation` 面板实时显示 errors 和 warnings；errors 会阻止 `Playtest`。
-7. 点击 `Playtest` 可直接用当前编辑关卡进入游戏，顶部 `Back to Editor` 会返回并保留编辑内容。
-8. `Export JSON` 会生成完整格式化 `LevelDefinition` JSON；`Import JSON` 可粘贴 JSON 重新载入。
-9. `Save` 和 `Save As New` 使用 `localStorage` 的 `grid-defense-custom-levels` key 保存；刷新页面后可在 `Saved Levels` 中读取、复制或删除。
+1. 点击 `新建关卡` 创建默认 12 列 × 8 行关卡。
+2. 使用 `地面`、`高台`、`禁用`、`入口`、`核心` 画笔点击或拖拽格子，编辑地图。
+3. 点击 `新增路径`，选择 `路径` 画笔，从 `spawn` 开始，沿相邻 `blue` 格绘制，最后点到 `base`。
+4. 在 `关卡设置` 中设置名称、描述、难度、初始生命、初始 DP、DP 回复、部署上限、手牌数量、槽位刷新时间和稀有度权重。
+5. 在 `波次编辑` 中添加波次和敌人组，配置 `enemyType`、`delay`、`count`、`interval`、`pathId`。
+6. `合法性检查` 面板实时显示错误和警告；错误会阻止 `试玩`。
+7. 点击 `试玩` 可直接用当前编辑关卡进入游戏，顶部 `返回编辑器` 会返回并保留编辑内容。
+8. `导出 JSON` 会生成完整格式化 `LevelDefinition` JSON；`导入 JSON` 可粘贴 JSON 重新载入。
+9. `保存` 和 `另存为新关卡` 使用 `localStorage` 的 `grid-defense-custom-levels` key 保存；刷新页面后可在 `本地关卡` 中读取、复制或删除。
 
 `LevelDefinition` 主要字段：
 
@@ -94,8 +94,8 @@ npm run lint
 ```json
 {
   "id": "sample-level",
-  "name": "Sample Operation",
-  "description": "Minimal custom level.",
+  "name": "示例行动",
+  "description": "最小自定义关卡。",
   "version": 1,
   "author": "DELEE LAB",
   "createdAt": "2026-06-05T00:00:00.000Z",
@@ -107,11 +107,11 @@ npm run lint
   "initialDp": 20,
   "dpRegenPerSecond": 1,
   "deployLimit": 6,
-  "grid": "Use the editor export for the full 8 x 12 LevelCell matrix.",
+  "grid": "请使用编辑器导出完整 8 x 12 LevelCell 矩阵。",
   "paths": [
     {
       "id": "main",
-      "name": "Main path",
+      "name": "主路径",
       "spawnCell": { "row": 3, "col": 0 },
       "baseCell": { "row": 3, "col": 11 },
       "points": [
@@ -125,7 +125,7 @@ npm run lint
   "waves": [
     {
       "id": "wave-1",
-      "name": "Wave 01",
+      "name": "第 01 波",
       "delayAfterPreviousWave": 0,
       "enemies": [
         {
@@ -158,7 +158,7 @@ npm run lint
 
 ## 新增地图
 
-现在推荐先用 Level Editor 制作并导出 JSON，再转换为 `LevelDefinition`。地图需要提供：
+现在推荐先用关卡编辑器制作并导出 JSON，再转换为 `LevelDefinition`。地图需要提供：
 
 1. 地图行列尺寸。
 2. 一个 `LevelCell[][]` 格子矩阵。

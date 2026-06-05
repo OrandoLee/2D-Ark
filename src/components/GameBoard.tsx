@@ -72,7 +72,7 @@ export function GameBoard({ state, isDraggingUnit, dragOverCell, onCellClick }: 
       <div
         className="game-board"
         role="grid"
-        aria-label={`${state.level.cols} columns by ${state.level.rows} rows tactical grid`}
+        aria-label={`${state.level.cols} 列 ${state.level.rows} 行战术网格`}
         style={{ gridTemplateColumns: `repeat(${state.level.cols}, 1fr)` }}
       >
         {state.mapCells.map((cell) => {

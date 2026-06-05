@@ -91,7 +91,7 @@ function createDefaultGrid(): LevelCell[][] {
 
 export const defaultEnemyPath: EnemyPath = {
   id: 'main',
-  name: 'Main path',
+  name: '主路径',
   spawnCell,
   baseCell,
   points: DEFAULT_PATH_POINTS,
@@ -100,7 +100,7 @@ export const defaultEnemyPath: EnemyPath = {
 export const defaultLevelWaves: LevelWave[] = [
   {
     id: 'wave-1',
-    name: 'Wave 01',
+    name: '第 01 波',
     delayAfterPreviousWave: 0,
     enemies: [
       { id: 'enemy-1-1', enemyType: 'runner', delay: 0, count: 2, interval: 1000, pathId: 'main' },
@@ -111,7 +111,7 @@ export const defaultLevelWaves: LevelWave[] = [
   },
   {
     id: 'wave-2',
-    name: 'Wave 02',
+    name: '第 02 波',
     delayAfterPreviousWave: 3000,
     enemies: [
       { id: 'enemy-2-1', enemyType: 'runner', delay: 0, count: 3, interval: 800, pathId: 'main' },
@@ -122,7 +122,7 @@ export const defaultLevelWaves: LevelWave[] = [
   },
   {
     id: 'wave-3',
-    name: 'Wave 03',
+    name: '第 03 波',
     delayAfterPreviousWave: 3000,
     enemies: [
       { id: 'enemy-3-1', enemyType: 'soldier', delay: 0, count: 2, interval: 1000, pathId: 'main' },
@@ -133,7 +133,7 @@ export const defaultLevelWaves: LevelWave[] = [
   },
   {
     id: 'wave-4',
-    name: 'Wave 04',
+    name: '第 04 波',
     delayAfterPreviousWave: 3000,
     enemies: [
       { id: 'enemy-4-1', enemyType: 'runner', delay: 0, count: 3, interval: 600, pathId: 'main' },
@@ -146,7 +146,7 @@ export const defaultLevelWaves: LevelWave[] = [
   },
   {
     id: 'wave-5',
-    name: 'Wave 05',
+    name: '第 05 波',
     delayAfterPreviousWave: 3000,
     enemies: [
       { id: 'enemy-5-1', enemyType: 'prototype-boss', delay: 0, count: 1, interval: 1000, pathId: 'main' },
@@ -163,8 +163,8 @@ export const defaultLevelWaves: LevelWave[] = [
 
 export const defaultLevel: LevelDefinition = {
   id: 'grid-defense-lab-01-default',
-  name: 'LAB-01 Default Operation',
-  description: 'The original tactical grid operation.',
+  name: 'LAB-01 默认行动',
+  description: '原始战术网格行动。',
   version: 1,
   author: 'DELEE LAB',
   createdAt: '2026-06-04T00:00:00.000Z',

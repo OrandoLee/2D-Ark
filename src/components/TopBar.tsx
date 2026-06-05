@@ -9,16 +9,16 @@ interface TopBarProps {
 
 export function TopBar({ state, onPause, onSpeed, onRestart }: TopBarProps) {
   const metrics = [
-    { label: 'Life', value: String(state.life).padStart(2, '0'), className: 'life' },
+    { label: '生命', value: String(state.life).padStart(2, '0'), className: 'life' },
     { label: 'DP', value: String(state.dp).padStart(3, '0'), className: 'dp' },
     {
-      label: 'Wave',
+      label: '波次',
       value: `${state.currentWave + 1}/${Math.max(1, state.waves.length)}`,
       className: 'wave',
     },
-    { label: 'Kills', value: String(state.kills).padStart(2, '0'), className: 'kills' },
+    { label: '击杀', value: String(state.kills).padStart(2, '0'), className: 'kills' },
     {
-      label: 'Deploy',
+      label: '部署',
       value: `${state.deployedUnits.length}/${state.level.deployLimit}`,
       className: 'deploy',
     },
@@ -35,11 +35,11 @@ export function TopBar({ state, onPause, onSpeed, onRestart }: TopBarProps) {
         ))}
       </div>
       <div className="controls">
-        <button onClick={onPause}>{state.isPaused ? 'Resume' : 'Pause'}</button>
+        <button onClick={onPause}>{state.isPaused ? '继续' : '暂停'}</button>
         <button className={state.speedMultiplier === 2 ? 'active' : ''} onClick={onSpeed}>
-          Speed {state.speedMultiplier}x
+          倍速 {state.speedMultiplier}x
         </button>
-        <button onClick={onRestart}>Restart</button>
+        <button onClick={onRestart}>重新开始</button>
       </div>
     </div>
   )

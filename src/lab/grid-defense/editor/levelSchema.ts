@@ -81,8 +81,8 @@ export function createNewLevel(): LevelDefinition {
   return markGridPaths({
     ...cloneDefaultLevel(),
     id: createId('level'),
-    name: 'Untitled Operation',
-    description: 'Custom tactical grid operation.',
+    name: '未命名行动',
+    description: '自定义战术网格行动。',
     author: 'DELEE LAB',
     createdAt: now,
     updatedAt: now,
@@ -166,7 +166,7 @@ function normalizePaths(paths: EnemyPath[] | undefined): EnemyPath[] {
     .filter((path) => Array.isArray(path.points) && path.points.length > 0)
     .map((path, index) => ({
       id: path.id || `path-${index + 1}`,
-      name: path.name || `Path ${index + 1}`,
+      name: path.name || `路径 ${index + 1}`,
       points: path.points.map((point) => ({ row: Number(point.row), col: Number(point.col) })),
       spawnCell: path.spawnCell ?? path.points[0],
       baseCell: path.baseCell ?? path.points[path.points.length - 1],
@@ -177,7 +177,7 @@ function normalizeWaves(waves: LevelWave[] | undefined): LevelWave[] {
   if (!Array.isArray(waves)) return []
   return waves.map((wave, waveIndex) => ({
     id: wave.id || `wave-${waveIndex + 1}`,
-    name: wave.name || `Wave ${waveIndex + 1}`,
+    name: wave.name || `第 ${waveIndex + 1} 波`,
     delayAfterPreviousWave: Number(wave.delayAfterPreviousWave ?? 0),
     enemies: Array.isArray(wave.enemies)
       ? wave.enemies.map((enemy, enemyIndex): WaveEnemy => ({
@@ -199,8 +199,8 @@ export function normalizeLevelDefinition(raw: unknown): LevelDefinition {
   const now = new Date().toISOString()
   const level: LevelDefinition = {
     id: input.id || createId('level'),
-    name: input.name || 'Untitled Operation',
-    description: input.description || 'Custom tactical grid operation.',
+    name: input.name || '未命名行动',
+    description: input.description || '自定义战术网格行动。',
     version: Number(input.version ?? LEVEL_VERSION),
     author: input.author || 'DELEE LAB',
     createdAt: input.createdAt || now,

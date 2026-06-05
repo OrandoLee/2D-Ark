@@ -72,8 +72,8 @@ export function GridDefenseGame({
       <section className="game-terminal" onClick={(event) => event.stopPropagation()}>
         {mode === 'playtest' && (
           <div className="playtest-ribbon">
-            <span>Testing: {state.level.name}</span>
-            <button onClick={onExitPlaytest}>Back to Editor</button>
+            <span>试玩中：{state.level.name}</span>
+            <button onClick={onExitPlaytest}>返回编辑器</button>
           </div>
         )}
         <div className="terminal-heading">
@@ -82,10 +82,10 @@ export function GridDefenseGame({
             <h1>GRID DEFENSE: LAB-01</h1>
           </div>
           <div className="heading-actions">
-            {onOpenEditor && <button onClick={onOpenEditor}>Level Editor</button>}
+            {onOpenEditor && <button onClick={onOpenEditor}>关卡编辑器</button>}
             <div className="signal">
               <span />
-              Online
+              在线
             </div>
           </div>
         </div>
@@ -105,11 +105,11 @@ export function GridDefenseGame({
               dragOverCell={dragState?.cell}
               onCellClick={actions.clickCell}
             />
-            {dragState && <div className="drag-instruction">Drag to a highlighted grid cell.</div>}
+            {dragState && <div className="drag-instruction">拖拽到高亮格子完成部署</div>}
             {state.isPaused && (
               <div className="pause-screen">
-                <span>Simulation Paused</span>
-                <button onClick={actions.togglePause}>Resume</button>
+                <span>模拟已暂停</span>
+                <button onClick={actions.togglePause}>继续</button>
               </div>
             )}
             {state.message && <div className="system-message">{state.message}</div>}
@@ -117,13 +117,13 @@ export function GridDefenseGame({
 
           <aside className="side-rail">
             <div className="rail-block">
-              <span className="rail-label">Action Monitor</span>
+              <span className="rail-label">行动监测</span>
               <strong>
                 {state.waveElapsed < 0
-                  ? `Prep / ${Math.ceil(-state.waveElapsed)}s`
+                  ? `战术准备 / ${Math.ceil(-state.waveElapsed)} 秒`
                   : state.intermission > 0
-                    ? `Next wave / ${Math.max(0, nextWaveDelay - state.intermission).toFixed(1)}s`
-                    : `Hostiles / ${String(state.enemies.length).padStart(2, '0')}`}
+                    ? `下一波 / ${Math.max(0, nextWaveDelay - state.intermission).toFixed(1)} 秒`
+                    : `场上敌人 / ${String(state.enemies.length).padStart(2, '0')}`}
               </strong>
               <div className="wave-track">
                 <span
