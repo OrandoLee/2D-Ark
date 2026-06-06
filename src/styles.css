@@ -65,8 +65,8 @@ button:focus-visible {
 }
 
 .app-intro img {
-  width: min(42vw, 390px);
-  max-width: 72%;
+  width: min(64vw, 680px);
+  max-width: 86%;
   filter: invert(1) drop-shadow(0 0 18px rgba(114,167,255,.42));
   opacity: .92;
   transform-origin: center;
