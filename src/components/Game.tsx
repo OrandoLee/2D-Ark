@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { UNIT_DEFINITIONS } from '../data/units'
 import { useGameState } from '../hooks/useGameState'
-import type { UnitId } from '../types/game'
+import type { GamePhase, GameState, UnitId } from '../types/game'
 import type { LevelDefinition } from '../types/level'
 import { DirectionPicker } from './DirectionPicker'
 import { GameBoard } from './GameBoard'
@@ -43,22 +43,49 @@ export function GridDefenseGame({
 }: GridDefenseGameProps) {
   const { state, actions } = useGameState(level, mode === 'playtest' ? 'playing' : 'start')
   const [dragState, setDragState] = useState<DragState>()
+  const [displayedPhase, setDisplayedPhase] = useState<GamePhase>(state.phase)
+  const [phaseTransition, setPhaseTransition] = useState<'idle' | 'entering' | 'exiting'>(
+    'entering',
+  )
 
   useEffect(() => {
     if (state.pendingDirectionCell || !state.selectedUnitId) setDragState(undefined)
   }, [state.pendingDirectionCell, state.selectedUnitId])
 
-  if (state.phase === 'start') {
-    return <StartScreen onStart={actions.startGame} onOpenEditor={onOpenEditor} />
+  useEffect(() => {
+    const enterTimer = window.setTimeout(() => setPhaseTransition('idle'), 420)
+    return () => window.clearTimeout(enterTimer)
+  }, [])
+
+  useEffect(() => {
+    if (state.phase === displayedPhase) return
+    setPhaseTransition('exiting')
+    const exitTimer = window.setTimeout(() => {
+      setDisplayedPhase(state.phase)
+      setPhaseTransition('entering')
+      window.setTimeout(() => setPhaseTransition('idle'), 420)
+    }, 220)
+    return () => window.clearTimeout(exitTimer)
+  }, [displayedPhase, state.phase])
+
+  if (displayedPhase === 'start') {
+    return (
+      <div className={`phase-view phase-view-${phaseTransition}`}>
+        <StartScreen onStart={actions.startGame} onOpenEditor={onOpenEditor} />
+      </div>
+    )
   }
 
-  if (state.phase === 'victory' || state.phase === 'defeat') {
+  if (displayedPhase === 'victory' || displayedPhase === 'defeat') {
+    const resultState: GameState = { ...state, phase: displayedPhase }
     return (
-      <ResultScreen
-        state={state}
-        onRestart={actions.restartGame}
-        onExitPlaytest={mode === 'playtest' ? onExitPlaytest : undefined}
-      />
+      <div className={`phase-view phase-view-${phaseTransition}`}>
+        <ResultScreen
+          state={resultState}
+          onRestart={actions.restartGame}
+          onExitPlaytest={mode === 'playtest' ? onExitPlaytest : undefined}
+        />
+      </div>
     )
   }
 
@@ -68,7 +95,10 @@ export function GridDefenseGame({
   const nextWaveDelay = state.waves[state.currentWave + 1]?.delayAfterPreviousWave ?? 3
 
   return (
-    <main className="game-shell" onClick={actions.cancelSelection}>
+    <main
+      className={`game-shell phase-view phase-view-${phaseTransition}`}
+      onClick={actions.cancelSelection}
+    >
       <section className="game-terminal" onClick={(event) => event.stopPropagation()}>
         {mode === 'playtest' && (
           <div className="playtest-ribbon">
